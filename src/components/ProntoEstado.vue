@@ -19,14 +19,12 @@
           Sistema anterior
         </button>
       </div>
-
-      <p v-if="avisoPortal" class="legacy-toast">{{ avisoPortal }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { inject } from 'vue'
 import { BookOpen, Pencil } from 'lucide-vue-next'
 
 defineProps({
@@ -45,11 +43,15 @@ defineProps({
   }
 })
 
-const avisoPortal = ref('')
+const openExternalModal = inject('openExternalModal', null)
 
 function abrirSistemaAnterior() {
-  avisoPortal.value =
-    'Redirección simulada al portal académico legado (estudiantes.uniputumayo.edu.co).'
+  const url = 'https://estudiantes.uniputumayo.edu.co/app_Login/'
+  if (openExternalModal) {
+    openExternalModal('Sistema Académico Anterior UNIPUTUMAYO', url)
+  } else {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 }
 </script>
 

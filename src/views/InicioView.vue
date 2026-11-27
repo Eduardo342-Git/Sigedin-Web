@@ -2,14 +2,26 @@
   <div class="page-stack">
     <!-- 1. Tarjeta Superior de Bienvenida -->
     <section class="welcome-card">
-      <div class="welcome-body">
-        <h2 class="welcome-greeting">{{ saludoDinamico }}, {{ estudianteMock.primerNombre }}</h2>
-        <p class="welcome-subtitle">
-          {{ estudianteMock.programaActual.programa }} •
-          {{ estudianteMock.programaActual.semestre }} •
-          Periodo {{ estudianteMock.programaActual.periodo }} •
-          Estado: <strong>{{ estudianteMock.programaActual.estado }}</strong>
-        </p>
+      <div class="welcome-top-row">
+        <div class="welcome-photo-box">
+          <img
+            v-if="fotoCarnet"
+            :src="fotoCarnet"
+            alt="Foto de perfil del estudiante"
+            class="welcome-photo-img"
+          />
+          <span v-else class="welcome-photo-initials">{{ estudianteMock.iniciales }}</span>
+        </div>
+
+        <div class="welcome-body">
+          <h2 class="welcome-greeting">{{ saludoDinamico }}, {{ estudianteMock.primerNombre }}</h2>
+          <p class="welcome-subtitle">
+            {{ estudianteMock.programaActual.programa }} •
+            {{ estudianteMock.programaActual.semestre }} •
+            Periodo {{ estudianteMock.programaActual.periodo }} •
+            Estado: <strong>{{ estudianteMock.programaActual.estado }}</strong>
+          </p>
+        </div>
       </div>
 
       <div class="welcome-alert">
@@ -71,7 +83,9 @@
                   class="course-cell"
                   :class="{ 'course-cell-active': isSelectedBlock(getCellState(dia.num, rowIdx).block) }"
                   :style="getBlockStyle(getCellState(dia.num, rowIdx).block)"
-                  @click.stop="openCoursePopover($event, getCellState(dia.num, rowIdx).block)"
+                  @mouseenter="showCoursePopover($event, getCellState(dia.num, rowIdx).block)"
+                  @mouseleave="hideCoursePopover"
+                  @click.stop="toggleCoursePopover($event, getCellState(dia.num, rowIdx).block)"
                 >
                   <div class="course-title">{{ getCellState(dia.num, rowIdx).block.unidad }}</div>
                   <div class="course-meta">
@@ -133,6 +147,11 @@ const selectedCourse = ref(null)
 const popoverPos = ref({ top: 0, left: 0 })
 const popoverRef = ref(null)
 const pdfFeedback = ref('')
+const fotoCarnet = ref(localStorage.getItem('sigedin_user_photo') || '')
+
+function syncUserPhoto() {
+  fotoCarnet.value = localStorage.getItem('sigedin_user_photo') || ''
+}
 
 const diasSemana = [
   { num: 1, nombre: 'Lunes' },
@@ -200,11 +219,7 @@ function isSelectedBlock(block) {
   )
 }
 
-function openCoursePopover(event, block) {
-  if (isSelectedBlock(block)) {
-    selectedCourse.value = null
-    return
-  }
+function showCoursePopover(event, block) {
   const rect = event.currentTarget.getBoundingClientRect()
   const halfWidth = 155
   const clampedLeft = Math.max(
@@ -216,6 +231,18 @@ function openCoursePopover(event, block) {
     left: clampedLeft
   }
   selectedCourse.value = block
+}
+
+function hideCoursePopover() {
+  selectedCourse.value = null
+}
+
+function toggleCoursePopover(event, block) {
+  if (isSelectedBlock(block)) {
+    selectedCourse.value = null
+    return
+  }
+  showCoursePopover(event, block)
 }
 
 function formatHorarioPopover(block) {
@@ -247,17 +274,23 @@ function exportarPdf() {
 onMounted(() => {
   document.addEventListener('click', closePopoverOnOutside)
   window.addEventListener('scroll', closePopoverOnScroll, true)
+  window.addEventListener('profile-photo-updated', syncUserPhoto)
+  window.addEventListener('storage', syncUserPhoto)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', closePopoverOnOutside)
   window.removeEventListener('scroll', closePopoverOnScroll, true)
+  window.removeEventListener('profile-photo-updated', syncUserPhoto)
+  window.removeEventListener('storage', syncUserPhoto)
 })
 </script>
 
 <style scoped>
 .page-stack {
-  max-width: 960px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 /* 1. Tarjeta Superior de Bienvenida */
@@ -265,12 +298,44 @@ onUnmounted(() => {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-left: 4px solid #f59e0b;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
+.welcome-top-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.welcome-photo-box {
+  width: 82px;
+  min-height: 100%;
+  border-right: 1px solid var(--border-color);
+  background-color: #185686;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.welcome-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.welcome-photo-initials {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
 .welcome-body {
+  flex: 1;
+  min-width: 0;
   padding: 18px 20px 14px;
 }
 
@@ -402,7 +467,7 @@ onUnmounted(() => {
 .matrix-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
@@ -472,6 +537,7 @@ onUnmounted(() => {
 }
 
 .course-cell {
+  box-sizing: border-box;
   background-color: var(--bg-surface);
   color: var(--text-primary);
   text-align: left !important;

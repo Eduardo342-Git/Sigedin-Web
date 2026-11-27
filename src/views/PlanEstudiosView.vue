@@ -7,7 +7,7 @@
         <p class="plan-code-sub">Plan de estudios {{ planEstudiosMock.plan }}</p>
       </div>
 
-      <button type="button" class="malla-btn" @click="showMallaModal = true">
+      <button type="button" class="malla-btn" @click="abrirMallaModal">
         <Network :size="16" />
         <span>Malla académica</span>
       </button>
@@ -35,7 +35,7 @@
           <span class="donut-caption">Avance del plan</span>
         </div>
 
-        <!-- 5 columnas de métricas -->
+        <!-- 6 columnas de métricas -->
         <div class="metrics-grid">
           <div class="metric-col">
             <div class="metric-value">
@@ -60,6 +60,10 @@
           <div class="metric-col">
             <div class="metric-value">{{ unidadesPorCursar }}</div>
             <div class="metric-label">Unidades por cursar</div>
+          </div>
+          <div class="metric-col">
+            <div class="metric-value metric-gpa">{{ promedioAcumulado }}</div>
+            <div class="metric-label">Promedio acumulado</div>
           </div>
         </div>
       </div>
@@ -88,10 +92,30 @@
       </div>
     </section>
 
+    <!-- Barra discreta de filtro rápido en los acordeones -->
+    <div class="accordions-toolbar">
+      <div class="filter-pills">
+        <button
+          v-for="f in filtrosEstado"
+          :key="f.key"
+          type="button"
+          class="filter-pill"
+          :class="{ active: estadoFiltro === f.key }"
+          @click="estadoFiltro = f.key"
+        >
+          {{ f.label }}
+        </button>
+      </div>
+
+      <button type="button" class="toggle-all-btn" @click="toggleTodosSemestres">
+        {{ todosExpandidos ? 'Contraer todos' : 'Expandir todos' }}
+      </button>
+    </div>
+
     <!-- 3. Lista de Acordeones Colapsables por Semestre -->
     <section class="accordions-list">
       <article
-        v-for="sem in semestres"
+        v-for="sem in semestresFiltrados"
         :key="sem.id"
         class="accordion-card"
       >
@@ -115,7 +139,7 @@
               />
             </div>
             <span class="acc-stats">
-              {{ getApprovedCount(sem) }} de {{ sem.unidades.length }} unidades ·
+              {{ getApprovedCount(sem) }} de {{ sem.totalUnidades }} unidades ·
               {{ getApprovedCredits(sem) }} de {{ sem.creditos }} créditos
             </span>
             <ChevronDown
@@ -139,7 +163,7 @@
                 </tr>
               </thead>
               <tbody>
-                <template v-for="unidad in sem.unidades" :key="unidad.codigo">
+                <template v-for="unidad in sem.unidadesVisibles" :key="unidad.codigo">
                   <tr
                     class="unit-row"
                     :class="{ 'row-expanded': expandedUnit === unidad.codigo }"
@@ -196,43 +220,108 @@
       </article>
     </section>
 
-    <!-- Modal de Malla Curricular Gráfica por Columnas -->
-    <div v-if="showMallaModal" class="malla-overlay" @click.self="showMallaModal = false">
+    <!-- Modal Sobreexpuesto de Malla Académica con Rutas SVG -->
+    <div v-if="showMallaModal" class="malla-overlay" @click.self="cerrarMallaModal">
       <div class="malla-modal">
         <div class="malla-modal-header">
-          <div>
-            <h3>Malla Académica · {{ planEstudiosMock.programa }}</h3>
-            <p class="muted-text" style="margin: 2px 0 0;">
-              Plan {{ planEstudiosMock.plan }} · Vista por semestres
-            </p>
+          <div class="malla-header-top">
+            <div>
+              <h3>Malla académica · {{ planEstudiosMock.programa }}</h3>
+              <p class="malla-sub">Plan {{ planEstudiosMock.plan }}</p>
+            </div>
+            <button type="button" class="close-btn" aria-label="Cerrar malla" @click="cerrarMallaModal">
+              <X :size="18" />
+            </button>
           </div>
-          <button type="button" class="close-btn" aria-label="Cerrar malla" @click="showMallaModal = false">
-            <X :size="18" />
-          </button>
+
+          <div class="malla-legend-row">
+            <div class="malla-legend-items">
+              <span class="mleg-item"><span class="mleg-dot dot-approved" />Aprobada</span>
+              <span class="mleg-item"><span class="mleg-dot dot-progress" />En curso</span>
+              <span class="mleg-item"><span class="mleg-dot dot-failed" />Reprobada</span>
+              <span class="mleg-item"><span class="mleg-dot dot-available" />Disponible</span>
+              <span class="mleg-item"><span class="mleg-dot dot-blocked" />Bloqueada</span>
+            </div>
+            <span class="malla-guide-text">
+              Toca una unidad para ver qué necesitas antes y qué abre después.
+            </span>
+          </div>
         </div>
 
-        <div class="malla-columns-scroll">
-          <div class="malla-columns">
-            <div v-for="sem in semestres" :key="sem.id" class="malla-col">
-              <div class="malla-col-header">
-                <span>{{ formatSemesterTitle(sem.nombre) }}</span>
-                <small>{{ sem.creditos }} cr.</small>
-              </div>
-              <div class="malla-col-items">
-                <div
-                  v-for="u in sem.unidades"
-                  :key="u.codigo"
-                  class="malla-node"
-                  :class="u.estado === 'aprobada' ? 'node-approved' : 'node-progress'"
+        <div class="malla-columns-scroll" @click="selectedMallaCode = null">
+          <div ref="mallaCanvasRef" class="malla-canvas">
+            <!-- Capa SVG de conectores Bézier curvos -->
+            <svg
+              class="malla-svg-layer"
+              :width="svgSize.width"
+              :height="svgSize.height"
+              aria-hidden="true"
+            >
+              <defs>
+                <marker
+                  id="malla-arrow-default"
+                  markerWidth="7"
+                  markerHeight="7"
+                  refX="6"
+                  refY="3.5"
+                  orient="auto"
                 >
-                  <div class="node-top">
-                    <span>{{ u.codigo }}</span>
-                    <span>{{ u.creditos }}c</span>
-                  </div>
-                  <div class="node-title">{{ u.nombre }}</div>
-                  <div class="node-grade">
-                    {{ u.nota !== null ? `Nota: ${u.nota.toFixed(1)}` : 'En curso' }}
-                  </div>
+                  <path d="M 0 0 L 7 3.5 L 0 7 z" class="arrow-head-default" />
+                </marker>
+                <marker
+                  id="malla-arrow-active"
+                  markerWidth="7"
+                  markerHeight="7"
+                  refX="6"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <path d="M 0 0 L 7 3.5 L 0 7 z" class="arrow-head-active" />
+                </marker>
+              </defs>
+
+              <path
+                v-for="edge in svgEdges"
+                :key="edge.id"
+                :d="edge.d"
+                fill="none"
+                class="malla-edge"
+                :class="{
+                  'edge-active': edge.active,
+                  'edge-dimmed': selectedMallaCode && !edge.active
+                }"
+                :marker-end="edge.active ? 'url(#malla-arrow-active)' : 'url(#malla-arrow-default)'"
+              />
+            </svg>
+
+            <!-- Columnas de Semestres -->
+            <div class="malla-columns">
+              <div v-for="sem in semestres" :key="sem.id" class="malla-col">
+                <div class="malla-col-header">
+                  <span>{{ formatSemesterTitle(sem.nombre) }}</span>
+                  <small>{{ sem.creditos }} cr.</small>
+                </div>
+                <div class="malla-col-items">
+                  <button
+                    v-for="u in sem.unidades"
+                    :key="u.codigo"
+                    :ref="(el) => setNodeRef(u.codigo, el)"
+                    type="button"
+                    class="malla-node"
+                    :class="[
+                      u.estado === 'aprobada' ? 'node-approved' : 'node-progress',
+                      {
+                        'node-highlighted': isNodeInSelectedChain(u.codigo),
+                        'node-dimmed': selectedMallaCode && !isNodeInSelectedChain(u.codigo)
+                      }
+                    ]"
+                    @click.stop="toggleMallaCourse(u.codigo)"
+                  >
+                    <div class="node-title">{{ u.nombre }}</div>
+                    <div class="node-meta">
+                      {{ u.creditos }} créd.<template v-if="u.nota !== null"> · {{ u.nota.toFixed(1) }}</template>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -244,14 +333,28 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ChevronDown, Network, X } from 'lucide-vue-next'
-import { planEstudiosMock } from '@/data/mockData'
+import { planEstudiosMock, prerrequisitosMallaMock } from '@/data/mockData'
 
 const showMallaModal = ref(false)
 // Por defecto semestres I-V colapsados y Sexto semestre (id: 6) expandido
 const openSemesters = ref(new Set([6]))
 const expandedUnit = ref(null)
+const estadoFiltro = ref('todas')
+
+const filtrosEstado = [
+  { key: 'todas', label: 'Todas' },
+  { key: 'aprobada', label: 'Aprobadas' },
+  { key: 'en_curso', label: 'En curso' }
+]
+
+// Estado de la Malla Académica y rutas SVG
+const selectedMallaCode = ref(null)
+const mallaCanvasRef = ref(null)
+const nodeRefs = new Map()
+const svgSize = ref({ width: 0, height: 0 })
+const svgEdges = ref([])
 
 const resumen = computed(() => planEstudiosMock.resumen)
 const semestres = computed(() => planEstudiosMock.semestres)
@@ -261,6 +364,43 @@ const pctAprobados = computed(() => Math.round((resumen.value.creditosAprobados 
 const pctEnCurso = computed(() => 100 - pctAprobados.value)
 const unidadesPorCursar = computed(
   () => resumen.value.unidadesTotal - resumen.value.unidadesAprobadas - resumen.value.unidadesEnCurso
+)
+
+// Promedio acumulado ponderado por créditos de asignaturas aprobadas
+const promedioAcumulado = computed(() => {
+  let sumWeighted = 0
+  let sumCredits = 0
+  for (const sem of semestres.value) {
+    for (const u of sem.unidades) {
+      if (u.estado === 'aprobada' && u.nota !== null) {
+        sumWeighted += u.nota * u.creditos
+        sumCredits += u.creditos
+      }
+    }
+  }
+  return sumCredits > 0 ? (sumWeighted / sumCredits).toFixed(2) : '—'
+})
+
+const semestresFiltrados = computed(() =>
+  semestres.value
+    .map((sem) => {
+      const unidadesVisibles =
+        estadoFiltro.value === 'todas'
+          ? sem.unidades
+          : sem.unidades.filter((u) => u.estado === estadoFiltro.value)
+      return {
+        ...sem,
+        totalUnidades: sem.unidades.length,
+        unidadesVisibles
+      }
+    })
+    .filter((sem) => sem.unidadesVisibles.length > 0)
+)
+
+const todosExpandidos = computed(
+  () =>
+    semestresFiltrados.value.length > 0 &&
+    semestresFiltrados.value.every((s) => openSemesters.value.has(s.id))
 )
 
 const circumference = 2 * Math.PI * 40
@@ -283,6 +423,14 @@ function toggleSemester(id) {
     next.add(id)
   }
   openSemesters.value = next
+}
+
+function toggleTodosSemestres() {
+  if (todosExpandidos.value) {
+    openSemesters.value = new Set()
+  } else {
+    openSemesters.value = new Set(semestresFiltrados.value.map((s) => s.id))
+  }
 }
 
 function toggleUnitDetail(codigo) {
@@ -339,6 +487,126 @@ function getUnitMeta(unidad) {
     componente
   }
 }
+
+// Lógica de cadena de prerrequisitos y conectores SVG en la Malla
+const selectedChain = computed(() => {
+  const start = selectedMallaCode.value
+  if (!start) return { nodes: new Set(), edges: new Set() }
+
+  const nodes = new Set([start])
+  const edges = new Set()
+
+  // Ancestros (qué necesitas antes)
+  const upQueue = [start]
+  while (upQueue.length) {
+    const curr = upQueue.shift()
+    for (const rel of prerrequisitosMallaMock) {
+      if (rel.to === curr) {
+        edges.add(`${rel.from}->${rel.to}`)
+        if (!nodes.has(rel.from)) {
+          nodes.add(rel.from)
+          upQueue.push(rel.from)
+        }
+      }
+    }
+  }
+
+  // Descendientes (qué abre después)
+  const downQueue = [start]
+  while (downQueue.length) {
+    const curr = downQueue.shift()
+    for (const rel of prerrequisitosMallaMock) {
+      if (rel.from === curr) {
+        edges.add(`${rel.from}->${rel.to}`)
+        if (!nodes.has(rel.to)) {
+          nodes.add(rel.to)
+          downQueue.push(rel.to)
+        }
+      }
+    }
+  }
+
+  return { nodes, edges }
+})
+
+function isNodeInSelectedChain(codigo) {
+  return selectedMallaCode.value !== null && selectedChain.value.nodes.has(codigo)
+}
+
+function toggleMallaCourse(codigo) {
+  selectedMallaCode.value = selectedMallaCode.value === codigo ? null : codigo
+}
+
+function setNodeRef(codigo, el) {
+  if (el) nodeRefs.set(codigo, el)
+  else nodeRefs.delete(codigo)
+}
+
+function computeSvgEdges() {
+  const canvasEl = mallaCanvasRef.value
+  if (!canvasEl) return
+
+  const canvasRect = canvasEl.getBoundingClientRect()
+  svgSize.value = {
+    width: canvasEl.scrollWidth,
+    height: canvasEl.scrollHeight
+  }
+
+  const nextEdges = []
+  for (const rel of prerrequisitosMallaMock) {
+    const fromEl = nodeRefs.get(rel.from)
+    const toEl = nodeRefs.get(rel.to)
+    if (!fromEl || !toEl) continue
+
+    const fromRect = fromEl.getBoundingClientRect()
+    const toRect = toEl.getBoundingClientRect()
+
+    const x1 = fromRect.right - canvasRect.left
+    const y1 = fromRect.top + fromRect.height / 2 - canvasRect.top
+    const x2 = toRect.left - canvasRect.left
+    const y2 = toRect.top + toRect.height / 2 - canvasRect.top
+    const dx = Math.max(24, (x2 - x1) * 0.5)
+
+    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`
+    const edgeId = `${rel.from}->${rel.to}`
+
+    nextEdges.push({
+      id: edgeId,
+      d,
+      active: selectedChain.value.edges.has(edgeId)
+    })
+  }
+  svgEdges.value = nextEdges
+}
+
+async function abrirMallaModal() {
+  showMallaModal.value = true
+  await nextTick()
+  computeSvgEdges()
+}
+
+function cerrarMallaModal() {
+  showMallaModal.value = false
+  selectedMallaCode.value = null
+}
+
+watch(selectedMallaCode, () => {
+  if (showMallaModal.value) {
+    nextTick(computeSvgEdges)
+  }
+})
+
+watch(showMallaModal, (isOpen) => {
+  if (isOpen) {
+    window.addEventListener('resize', computeSvgEdges)
+  } else {
+    window.removeEventListener('resize', computeSvgEdges)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', computeSvgEdges)
+})
 </script>
 
 <style scoped>
@@ -468,23 +736,31 @@ function getUnitMeta(unidad) {
 .metrics-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(110px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(6, minmax(95px, 1fr));
+  gap: 12px;
 }
 
 .metric-col {
   border-left: 2px solid var(--border-color);
-  padding-left: 12px;
+  padding-left: 11px;
 }
 
 .metric-value {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
+.metric-gpa {
+  color: #185686;
+}
+
+:root.dark .metric-gpa {
+  color: var(--text-brand);
+}
+
 .metric-label {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
   margin-top: 2px;
 }
@@ -545,6 +821,57 @@ function getUnitMeta(unidad) {
 
 .sq-pending {
   background-color: var(--border-color);
+}
+
+/* Barra discreta de filtro rápido */
+.accordions-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: -8px;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-pill.active {
+  background-color: #185686;
+  border-color: #185686;
+  color: #ffffff;
+}
+
+.toggle-all-btn {
+  border: none;
+  background: transparent;
+  color: #185686;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+:root.dark .toggle-all-btn {
+  color: var(--text-brand);
+}
+
+.toggle-all-btn:hover {
+  text-decoration: underline;
 }
 
 /* 3. Acordeones por Semestre */
@@ -769,11 +1096,11 @@ function getUnitMeta(unidad) {
   margin-right: 6px;
 }
 
-/* Modal Malla Académica */
+/* Modal Malla Académica (Modo Claro y Modo Oscuro + SVG) */
 .malla-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.65);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -781,12 +1108,13 @@ function getUnitMeta(unidad) {
 }
 
 .malla-modal {
-  width: 100%;
-  max-width: 1120px;
-  max-height: 88vh;
+  width: 95vw;
+  max-width: 1280px;
+  max-height: 90vh;
   background-color: var(--bg-surface);
+  color: var(--text-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: 10px;
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
@@ -795,10 +1123,18 @@ function getUnitMeta(unidad) {
 
 .malla-modal-header {
   padding: 16px 20px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.malla-header-top {
+  display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -806,6 +1142,12 @@ function getUnitMeta(unidad) {
   margin: 0;
   font-size: 1.05rem;
   color: var(--text-brand);
+}
+
+.malla-sub {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 
 .close-btn {
@@ -818,24 +1160,139 @@ function getUnitMeta(unidad) {
   display: grid;
   place-items: center;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.malla-legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.78rem;
+}
+
+.malla-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mleg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.mleg-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.dot-approved {
+  background-color: #84cc16;
+}
+
+.dot-progress {
+  background-color: #3b82f6;
+}
+
+.dot-failed {
+  background-color: #ef4444;
+}
+
+.dot-available {
+  border: 2px solid #3b82f6;
+  background: transparent;
+}
+
+.dot-blocked {
+  background-color: #94a3b8;
+}
+
+.malla-guide-text {
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .malla-columns-scroll {
   overflow: auto;
-  padding: 16px 20px 20px;
+  padding: 18px 20px 22px;
+  background-color: var(--bg-app);
+}
+
+.malla-canvas {
+  position: relative;
+  min-width: max-content;
+}
+
+.malla-svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.malla-edge {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+  opacity: 0.45;
+  transition: stroke 0.2s ease, opacity 0.2s ease, stroke-width 0.2s ease;
+}
+
+:root.dark .malla-edge {
+  stroke: #64748b;
+}
+
+.malla-edge.edge-active {
+  stroke: #185686;
+  stroke-width: 2.3;
+  opacity: 1;
+}
+
+:root.dark .malla-edge.edge-active {
+  stroke: #38bdf8;
+}
+
+.malla-edge.edge-dimmed {
+  opacity: 0.14;
+}
+
+.arrow-head-default {
+  fill: #94a3b8;
+}
+
+:root.dark .arrow-head-default {
+  fill: #64748b;
+}
+
+.arrow-head-active {
+  fill: #185686;
+}
+
+:root.dark .arrow-head-active {
+  fill: #38bdf8;
 }
 
 .malla-columns {
+  position: relative;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(6, minmax(185px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(6, minmax(175px, 1fr));
+  gap: 26px;
 }
 
 .malla-col {
-  background: var(--bg-surface-muted);
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  align-self: start;
 }
 
 .malla-col-header {
@@ -849,47 +1306,76 @@ function getUnitMeta(unidad) {
 }
 
 .malla-col-items {
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .malla-node {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-left: 3px solid #65a30d;
+  width: 100%;
+  text-align: left;
   border-radius: 6px;
-  padding: 8px;
+  padding: 9px 10px;
   font-size: 0.76rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.malla-node.node-progress {
-  border-left-color: #f59e0b;
+.malla-node:hover {
+  transform: translateY(-1px);
 }
 
-.node-top {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 700;
-  color: var(--text-secondary);
-  font-size: 0.7rem;
+.node-approved {
+  background-color: #e8f3dc;
+  border: 1px solid #84cc16;
+  color: #1e293b;
+}
+
+:root.dark .node-approved {
+  background-color: rgba(132, 204, 22, 0.16);
+  border-color: rgba(132, 204, 22, 0.45);
+  color: #f1f5f9;
+}
+
+.node-progress {
+  background-color: #dcebfa;
+  border: 1px solid #3b82f6;
+  color: #1e293b;
+}
+
+:root.dark .node-progress {
+  background-color: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #f1f5f9;
+}
+
+.node-highlighted {
+  box-shadow: 0 0 0 2px #185686;
+}
+
+:root.dark .node-highlighted {
+  box-shadow: 0 0 0 2px #38bdf8;
+}
+
+.node-dimmed {
+  opacity: 0.35;
 }
 
 .node-title {
-  font-weight: 600;
-  margin: 4px 0;
+  font-weight: 700;
   line-height: 1.25;
+  margin-bottom: 4px;
 }
 
-.node-grade {
+.node-meta {
   font-size: 0.72rem;
-  color: var(--text-secondary);
+  opacity: 0.85;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .metrics-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
   }
 }
 </style>

@@ -17,7 +17,26 @@
     >
       <div class="sidebar-inner">
         <div class="sidebar-brand">
-          <img src="/logo-blanco.png" alt="UniPutumayo - Institución Universitaria del Putumayo" />
+          <img
+            v-if="!isSidebarMini"
+            src="/logo-blanco.png"
+            alt="UniPutumayo - Institución Universitaria del Putumayo"
+          />
+          <svg
+            v-else
+            class="brand-isotipo-svg"
+            width="30"
+            height="34"
+            viewBox="0 0 30 34"
+            fill="none"
+            aria-label="UniPutumayo"
+          >
+            <circle cx="15" cy="8.5" r="4.5" fill="#FFFFFF" />
+            <path
+              d="M4 11V20.5C4 26.85 8.92 31.5 15 31.5C21.08 31.5 26 26.85 26 20.5V11H21V20.5C21 24.09 18.31 26.5 15 26.5C11.69 26.5 9 24.09 9 20.5V11H4Z"
+              fill="#FFFFFF"
+            />
+          </svg>
           <button
             class="collapse-btn"
             type="button"
@@ -36,6 +55,8 @@
         </div>
 
         <nav class="sidebar-nav" aria-label="Menú principal de estudiante">
+          <div v-if="!isSidebarMini" class="nav-section-label">Gestión Académica</div>
+
           <RouterLink
             to="/"
             class="nav-item"
@@ -44,8 +65,8 @@
             :title="isSidebarMini ? 'Inicio' : undefined"
             @click="onNavClick"
           >
-            <Home :size="19" class="nav-icon" />
-            <span>Inicio</span>
+            <Home :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Inicio</span>
           </RouterLink>
 
           <div class="nav-group">
@@ -57,15 +78,16 @@
               :title="isSidebarMini ? 'Matrícula' : undefined"
               @click="toggleGroup('matricula')"
             >
-              <ClipboardList :size="19" class="nav-icon" />
-              <span class="flex-1">Matrícula</span>
+              <ClipboardCheck :size="20" :stroke-width="1.85" class="nav-icon" />
+              <span v-if="!isSidebarMini" class="flex-1">Matrícula</span>
               <ChevronDown
+                v-if="!isSidebarMini"
                 :size="17"
                 class="group-arrow"
                 :class="{ rotated: matriculaExpanded }"
               />
             </button>
-            <div v-show="matriculaExpanded" class="nav-group-children">
+            <div v-if="!isSidebarMini" v-show="matriculaExpanded" class="nav-group-children">
               <RouterLink
                 to="/matricula/requisitos"
                 class="nav-item nav-child"
@@ -93,8 +115,8 @@
             :title="isSidebarMini ? 'Plan de Estudios' : undefined"
             @click="onNavClick"
           >
-            <Layers :size="19" class="nav-icon" />
-            <span>Plan de Estudios</span>
+            <GitFork :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Plan de Estudios</span>
           </RouterLink>
 
           <RouterLink
@@ -104,9 +126,12 @@
             :title="isSidebarMini ? 'Notas y boletín' : undefined"
             @click="onNavClick"
           >
-            <Award :size="19" class="nav-icon" />
-            <span>Notas y boletín</span>
+            <BarChart2 :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Notas y boletín</span>
           </RouterLink>
+
+          <div v-if="!isSidebarMini" class="nav-section-label">Requisitos y Proyección</div>
+          <div v-else class="nav-section-divider" />
 
           <RouterLink
             to="/cursos-grado"
@@ -115,8 +140,8 @@
             :title="isSidebarMini ? 'Cursos Req. Grado' : undefined"
             @click="onNavClick"
           >
-            <GraduationCap :size="19" class="nav-icon" />
-            <span>Cursos Req. Grado</span>
+            <GraduationCap :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Cursos Req. Grado</span>
           </RouterLink>
 
           <RouterLink
@@ -126,8 +151,8 @@
             :title="isSidebarMini ? 'Actividades Bienestar U.' : undefined"
             @click="onNavClick"
           >
-            <Heart :size="19" class="nav-icon" />
-            <span>Actividades Bienestar U.</span>
+            <Heart :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Actividades Bienestar U.</span>
           </RouterLink>
 
           <RouterLink
@@ -137,8 +162,8 @@
             :title="isSidebarMini ? 'Inscribir Propuesta Grado' : undefined"
             @click="onNavClick"
           >
-            <FileEdit :size="19" class="nav-icon" />
-            <span>Inscribir Propuesta Grado</span>
+            <FileEdit :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Inscribir Propuesta Grado</span>
           </RouterLink>
 
           <RouterLink
@@ -148,20 +173,12 @@
             :title="isSidebarMini ? 'Horas sociales (Ciecyt)' : undefined"
             @click="onNavClick"
           >
-            <Clock :size="19" class="nav-icon" />
-            <span>Horas sociales (Ciecyt)</span>
+            <HandHeart :size="20" :stroke-width="1.85" class="nav-icon" />
+            <span v-if="!isSidebarMini">Horas sociales (Ciecyt)</span>
           </RouterLink>
 
-          <RouterLink
-            to="/evaluacion-docente"
-            class="nav-item"
-            active-class="nav-item-active"
-            :title="isSidebarMini ? 'Evaluación Docente' : undefined"
-            @click="onNavClick"
-          >
-            <Star :size="19" class="nav-icon" />
-            <span>Evaluación Docente</span>
-          </RouterLink>
+          <div v-if="!isSidebarMini" class="nav-section-label">Portal y Trámites</div>
+          <div v-else class="nav-section-divider" />
 
           <div class="nav-group">
             <button
@@ -172,22 +189,23 @@
               :title="isSidebarMini ? 'Servicios en Línea' : undefined"
               @click="toggleGroup('servicios')"
             >
-              <Wifi :size="19" class="nav-icon" />
-              <span class="flex-1">Servicios en Línea</span>
+              <Settings :size="20" :stroke-width="1.85" class="nav-icon" />
+              <span v-if="!isSidebarMini" class="flex-1">Servicios en Línea</span>
               <ChevronDown
+                v-if="!isSidebarMini"
                 :size="17"
                 class="group-arrow"
                 :class="{ rotated: serviciosExpanded }"
               />
             </button>
-            <div v-show="serviciosExpanded" class="nav-group-children">
+            <div v-if="!isSidebarMini" v-show="serviciosExpanded" class="nav-group-children">
               <RouterLink
                 to="/servicios/solicitudes"
                 class="nav-item nav-child"
                 active-class="nav-item-active"
                 @click="onNavClick"
               >
-                <span>Solicitudes</span>
+                <span class="flex-1">Solicitudes</span>
               </RouterLink>
               <RouterLink
                 to="/servicios/paz-y-salvo"
@@ -195,16 +213,36 @@
                 active-class="nav-item-active"
                 @click="onNavClick"
               >
-                <span>Paz y Salvo</span>
+                <span class="flex-1">Paz y Salvo</span>
               </RouterLink>
+              <a
+                href="https://virtual.itp.edu.co/moodle2026-2/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-item nav-child"
+                @click.prevent="solicitarRedireccionExterna('Moodle UNIPUTUMAYO', 'https://virtual.itp.edu.co/moodle2026-2/')"
+              >
+                <span class="flex-1">Moodle</span>
+                <ExternalLink :size="14" class="sidebar-ext-icon" />
+              </a>
+              <a
+                href="https://evadoc.itp.edu.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-item nav-child"
+                @click.prevent="solicitarRedireccionExterna('Evaluación Docente UNIPUTUMAYO', 'https://evadoc.itp.edu.co')"
+              >
+                <span class="flex-1">Evaluación Docente</span>
+                <ExternalLink :size="14" class="sidebar-ext-icon" />
+              </a>
             </div>
           </div>
         </nav>
 
-        <div class="sidebar-footer">
-          <div>SIGEDIN Académico · v2.24.0</div>
+        <div v-if="!isSidebarMini" class="sidebar-footer">
+          <div>SIGEDIN Académico · v2.25.0</div>
           <div>Institución Universitaria del Putumayo</div>
-          <div class="role-tag">Rol: Estudiante</div>
+          <div class="sidebar-credits">Developed by <span class="credit-brand">LosTS</span></div>
         </div>
       </div>
     </aside>
@@ -221,6 +259,7 @@
       <header class="app-header">
         <div class="app-toolbar">
           <button
+            v-if="isMobile"
             class="icon-btn menu-toggle"
             type="button"
             aria-label="Abrir o cerrar menú"
@@ -251,7 +290,15 @@
                 :aria-expanded="accountMenuOpen"
                 @click.stop="accountMenuOpen = !accountMenuOpen"
               >
-                <span class="avatar-circle">{{ estudianteMock.iniciales }}</span>
+                <span class="avatar-circle">
+                  <img
+                    v-if="userPhoto"
+                    :src="userPhoto"
+                    alt="Foto de perfil"
+                    class="avatar-photo-img"
+                  />
+                  <span v-else>{{ estudianteMock.iniciales }}</span>
+                </span>
                 <span class="account-info">
                   <span class="account-name">{{ estudianteMock.nombreCompleto }}</span>
                   <span class="account-id">{{ estudianteMock.identificacion }}</span>
@@ -311,7 +358,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   class="dropdown-item"
-                  @click="accountMenuOpen = false"
+                  @click.prevent="solicitarRedireccionExterna('Moodle UNIPUTUMAYO', 'https://virtual.itp.edu.co/moodle2026-2/')"
                 >
                   <Globe :size="17" class="dropdown-icon" />
                   <span class="dropdown-label">Moodle</span>
@@ -323,7 +370,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   class="dropdown-item"
-                  @click="accountMenuOpen = false"
+                  @click.prevent="solicitarRedireccionExterna('Evaluación Institucional UNIPUTUMAYO', 'https://evadoc.itp.edu.co')"
                 >
                   <Star :size="17" class="dropdown-icon" />
                   <span class="dropdown-label">Evaluación institucional</span>
@@ -340,7 +387,7 @@
                   </span>
                 </button>
 
-                <button type="button" class="dropdown-item dropdown-logout" @click="confirmarSalir">
+                <button type="button" class="dropdown-item" @click="confirmarSalir">
                   <LogOut :size="17" class="dropdown-icon" />
                   <span class="dropdown-label">Salir</span>
                 </button>
@@ -396,7 +443,7 @@
         </div>
       </div>
     </div>
-    <!-- Modal de aviso institucional (Biblioteca / Salir) -->
+    <!-- Modal de aviso institucional (Salir) -->
     <div v-if="systemModal" class="modal-overlay" @click.self="systemModal = null">
       <div class="modal-card">
         <div class="modal-header">
@@ -405,9 +452,37 @@
             <X :size="18" />
           </button>
         </div>
-        <p class="muted-text">{{ systemModal.message }}</p>
-        <div class="modal-actions">
+        <div class="modal-body">
+          <p class="muted-text" style="margin: 0;">{{ systemModal.message }}</p>
+        </div>
+        <div class="modal-footer">
           <button class="btn-primary" type="button" @click="systemModal = null">Entendido</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación de Redirección Externa -->
+    <div v-if="externalRedirect" class="modal-overlay" @click.self="externalRedirect = null">
+      <div class="modal-card external-modal-card">
+        <div class="external-modal-body">
+          <div class="external-icon-circle" aria-hidden="true">
+            <ExternalLink :size="24" />
+          </div>
+          <h3 class="external-modal-title">Estás a punto de salir de SIGEDIN</h3>
+          <p class="external-modal-desc">
+            Serás redirigido al portal externo de
+            <strong>{{ externalRedirect.name }}</strong>
+            en una nueva pestaña del navegador:
+          </p>
+          <div class="external-url-box">{{ externalRedirect.url }}</div>
+          <div class="external-modal-actions">
+            <button type="button" class="btn-outline" @click="externalRedirect = null">
+              Cancelar
+            </button>
+            <button type="button" class="btn-primary" @click="confirmarRedireccionExterna">
+              Continuar y abrir
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -415,34 +490,34 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
-  Award,
+  BarChart2,
   BookOpen,
   Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
-  Clock,
+  ClipboardCheck,
   CreditCard,
   ExternalLink,
   FileEdit,
+  GitFork,
   Globe,
   GraduationCap,
+  HandHeart,
   Heart,
   Home,
-  Layers,
   LogOut,
   Menu,
   Moon,
   RefreshCw,
+  Settings,
   Star,
   Sun,
   TrendingUp,
   User,
-  Wifi,
   X
 } from 'lucide-vue-next'
 import { estudianteMock } from '@/data/mockData'
@@ -450,14 +525,37 @@ import { estudianteMock } from '@/data/mockData'
 const route = useRoute()
 const isMobile = ref(window.innerWidth < 1024)
 const drawerOpen = ref(window.innerWidth >= 1024)
-const matriculaExpanded = ref(true)
-const serviciosExpanded = ref(true)
+const matriculaExpanded = ref(false)
+const serviciosExpanded = ref(false)
 const accountMenuOpen = ref(false)
 const accountWrapRef = ref(null)
 const ratingModalOpen = ref(false)
 const ratingValue = ref(5)
 const systemModal = ref(null)
+const externalRedirect = ref(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
+const userPhoto = ref(localStorage.getItem('sigedin_user_photo') || '')
+
+function syncUserPhoto() {
+  userPhoto.value = localStorage.getItem('sigedin_user_photo') || ''
+}
+
+function solicitarRedireccionExterna(name, url) {
+  accountMenuOpen.value = false
+  if (isMobile.value) {
+    drawerOpen.value = false
+  }
+  externalRedirect.value = { name, url }
+}
+
+function confirmarRedireccionExterna() {
+  if (!externalRedirect.value) return
+  const targetUrl = externalRedirect.value.url
+  externalRedirect.value = null
+  window.open(targetUrl, '_blank', 'noopener,noreferrer')
+}
+
+provide('openExternalModal', solicitarRedireccionExterna)
 
 const currentTitle = computed(() => route.meta?.title || 'SIGEDIN Académico')
 const isSidebarMini = computed(() => !drawerOpen.value && !isMobile.value)
@@ -526,11 +624,15 @@ function confirmarSalir() {
 onMounted(() => {
   window.addEventListener('resize', handleResize)
   document.addEventListener('click', handleClickOutsideAccount)
+  window.addEventListener('profile-photo-updated', syncUserPhoto)
+  window.addEventListener('storage', syncUserPhoto)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   document.removeEventListener('click', handleClickOutsideAccount)
+  window.removeEventListener('profile-photo-updated', syncUserPhoto)
+  window.removeEventListener('storage', syncUserPhoto)
 })
 </script>
 
@@ -548,11 +650,13 @@ onUnmounted(() => {
   left: 0;
   bottom: 0;
   width: var(--sidebar-width);
-  background-color: var(--color-sidebar-bg);
+  background: linear-gradient(180deg, #185686 0%, #12456d 55%, #0d3554 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
   color: #ffffff;
   z-index: 40;
   overflow: hidden;
-  transition: transform 0.22s ease, width 0.22s ease;
+  transition: transform 0.25s ease, width 0.25s ease;
   display: flex;
   flex-direction: column;
 }
@@ -565,15 +669,28 @@ onUnmounted(() => {
   width: var(--sidebar-collapsed-width);
 }
 
-.sidebar-mini .sidebar-brand img {
-  opacity: 0;
-  pointer-events: none;
+.sidebar-mini .sidebar-brand {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.brand-isotipo-svg {
+  width: 30px;
+  height: 34px;
+  flex-shrink: 0;
 }
 
 .sidebar-mini .collapse-btn {
-  top: 50%;
-  right: 18px;
-  transform: translateY(-50%);
+  position: static;
+  transform: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
 }
 
 .sidebar-mini .nav-item > span,
@@ -590,6 +707,28 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
+.sidebar-mini .nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 42px;
+  margin: 4px auto;
+  padding: 0;
+  border-radius: 10px;
+  border-left: none;
+}
+
+.sidebar-mini .nav-item:hover {
+  transform: none;
+}
+
+.nav-section-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 8px 16px;
+}
+
 .sidebar-inner {
   display: flex;
   flex-direction: column;
@@ -600,37 +739,36 @@ onUnmounted(() => {
 
 .sidebar-brand {
   position: relative;
-  height: 78px;
   flex-shrink: 0;
-  padding: 12px 16px;
+  padding: 22px 18px 20px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 14px;
   overflow: hidden;
 }
 
 .sidebar-brand img {
-  width: 185px;
-  max-width: 185px;
+  width: 152px;
+  max-width: 152px;
   height: auto;
   flex-shrink: 0;
   transition: opacity 0.15s ease;
 }
 
 .collapse-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: top 0.22s ease, right 0.22s ease, transform 0.22s ease, background-color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .collapse-btn:hover {
@@ -655,27 +793,38 @@ onUnmounted(() => {
 
 .sidebar-nav {
   flex: 1;
-  padding: 8px 0;
+  padding: 6px 0 12px;
   display: flex;
   flex-direction: column;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 12px 18px 4px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 44px;
-  padding: 8px 22px;
-  font-size: 0.95rem;
+  margin: 2px 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.92rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.92);
   background: transparent;
   border: none;
-  width: 100%;
+  border-left: 3px solid transparent;
+  width: calc(100% - 20px);
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .nav-item > span,
@@ -686,12 +835,13 @@ onUnmounted(() => {
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.09);
+  transform: translateX(2px);
 }
 
 .nav-item-active {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.16);
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--color-amber);
+  border-left: 3px solid #f59e0b;
 }
 
 .nav-icon {
@@ -716,47 +866,69 @@ onUnmounted(() => {
 }
 
 .nav-group-children {
-  background: rgba(0, 0, 0, 0.16);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.22);
+  margin-left: 24px;
+  padding: 2px 0;
   overflow: hidden;
-  max-height: 200px;
+  max-height: 240px;
   transition: max-height 0.22s ease, opacity 0.18s ease;
 }
 
 .nav-child {
-  padding-left: 48px;
-  min-height: 40px;
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 2px 10px 2px 8px;
+  padding: 8px 12px;
+  width: calc(100% - 18px);
+  min-height: 36px;
+  font-size: 0.86rem;
+}
+
+.nav-child > span.flex-1 {
+  white-space: normal;
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar-pronto-badge {
-  font-size: 11px;
+  flex-shrink: 0;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1.2;
-  padding: 2px 7px;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.85);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.sidebar-ext-icon {
+  opacity: 0.72;
   flex-shrink: 0;
 }
 
 .sidebar-footer {
-  padding: 14px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.82);
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 0.15s ease;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.role-tag {
-  margin-top: 6px;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+.sidebar-credits {
+  margin-top: 5px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.credit-brand {
   font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .drawer-backdrop {
@@ -866,6 +1038,15 @@ onUnmounted(() => {
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
 .account-info {
@@ -967,14 +1148,6 @@ onUnmounted(() => {
   margin: 6px 8px;
 }
 
-.dropdown-logout {
-  color: var(--color-danger);
-}
-
-.dropdown-logout .dropdown-icon {
-  color: var(--color-danger);
-}
-
 .brand-stripe {
   height: 3px;
   background: linear-gradient(90deg, var(--color-green) 0 14%, var(--color-amber) 14% 100%);
@@ -1062,6 +1235,69 @@ onUnmounted(() => {
   gap: 8px;
 }
 
+/* Modal de Redirección Externa */
+.external-modal-card {
+  max-width: 440px;
+}
+
+.external-modal-body {
+  padding: 26px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.external-icon-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(24, 86, 134, 0.12);
+  color: #185686;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+}
+
+:root.dark .external-icon-circle {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+}
+
+.external-modal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.external-modal-desc {
+  margin: 8px 0 14px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.external-url-box {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  word-break: break-all;
+  margin-bottom: 18px;
+}
+
+.external-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
 @media (max-width: 1023px) {
   .sidebar-user-mobile {
     display: block;
@@ -1078,14 +1314,18 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .app-toolbar {
     padding: 8px 12px;
     gap: 8px;
   }
 
   .toolbar-title {
-    font-size: 0.96rem;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46vw;
   }
 
   .account-info {

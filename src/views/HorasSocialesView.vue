@@ -1,28 +1,31 @@
 <template>
   <div class="page-stack">
-    <!-- 2. Encabezado Descriptivo Superior -->
+    <!-- Encabezado Descriptivo Superior -->
     <p class="intro-copy">
       Tus participaciones en propuestas de horas sociales del Ciecyt. Las horas cuentan cuando cumples tu parte y el Ciecyt finaliza la propuesta.
     </p>
 
-    <!-- 3. Bloque de Progreso del Programa -->
+    <!-- Bloque de Progreso del Programa -->
     <section class="section-block">
       <h2 class="section-heading">{{ estudianteMock.programaActual.programa }}</h2>
       <div class="program-sub">
         {{ estudianteMock.programaActual.ciclo }} · SNIES {{ estudianteMock.programaActual.snies }}
       </div>
-      <div class="hours-count-line">
-        <strong>{{ horasSocialesMock.acumuladas }}</strong> de {{ horasSocialesMock.requeridas }} horas ·
-        <span class="status-complete">
-          {{ horasSocialesMock.completo ? 'Completo' : 'En progreso' }}
-        </span>
+      <div class="hours-count-row">
+        <div class="hours-count-line">
+          <strong>{{ horasSocialesMock.acumuladas }}</strong> de {{ horasSocialesMock.requeridas }} horas ·
+          <span class="status-complete">
+            {{ horasSocialesMock.completo ? 'Completo' : 'En progreso' }}
+          </span>
+        </div>
+        <span class="verify-code-tag">Código de verificación: {{ CODIGO_VERIFICACION }}</span>
       </div>
       <div class="progress-track" role="progressbar" :aria-valuenow="porcentajeHoras" aria-valuemin="0" aria-valuemax="100">
         <div class="progress-fill" :style="{ width: `${porcentajeHoras}%` }" />
       </div>
     </section>
 
-    <!-- 4. Sección MIS PROPUESTAS -->
+    <!-- Sección MIS PROPUESTAS -->
     <section class="section-block">
       <h2 class="section-heading">MIS PROPUESTAS</h2>
 
@@ -59,7 +62,7 @@
                   <button
                     type="button"
                     class="cert-btn"
-                    @click="certificadoActivo = item"
+                    @click="abrirCertificadoOficial(item)"
                   >
                     Certificado
                   </button>
@@ -70,50 +73,14 @@
         </div>
       </div>
     </section>
-
-    <!-- Modal de vista previa del Certificado Institucional -->
-    <div v-if="certificadoActivo" class="modal-overlay" @click.self="certificadoActivo = null">
-      <div class="cert-modal">
-        <div class="cert-modal-header">
-          <h3>Certificado de Horas Sociales (CIECYT)</h3>
-          <button type="button" class="close-btn" aria-label="Cerrar" @click="certificadoActivo = null">
-            <X :size="18" />
-          </button>
-        </div>
-
-        <div class="cert-preview">
-          <div class="cert-institution">INSTITUCIÓN UNIVERSITARIA DEL PUTUMAYO</div>
-          <div class="cert-subtitle">Centro de Investigación, Extensión y Proyección Social · CIECYT</div>
-          <p class="cert-body">
-            Certifica que <strong>{{ estudianteMock.nombreCompleto }}</strong>, identificado(a) con documento
-            <strong>{{ estudianteMock.identificacion }}</strong>, estudiante del programa
-            <strong>{{ estudianteMock.programaActual.programa }}</strong>, cumplió satisfactoriamente con
-            <strong>{{ certificadoActivo.horas }} horas</strong> de proyección social en la propuesta:
-          </p>
-          <blockquote class="cert-project">“{{ certificadoActivo.titulo }}”</blockquote>
-          <div class="cert-meta">
-            <span><strong>Periodo:</strong> {{ certificadoActivo.periodo }}</span>
-            <span><strong>Supervisor:</strong> {{ certificadoActivo.supervisor }}</span>
-          </div>
-        </div>
-
-        <div class="cert-modal-actions">
-          <button type="button" class="btn-outline" @click="certificadoActivo = null">Cerrar</button>
-          <button type="button" class="btn-primary" @click="imprimirCertificado">
-            Imprimir / Guardar PDF
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { X } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { estudianteMock, horasSocialesMock } from '@/data/mockData'
 
-const certificadoActivo = ref(null)
+const CODIGO_VERIFICACION = 'CIECYT-2026-8841'
 
 const participaciones = computed(() => [
   {
@@ -127,8 +94,261 @@ const porcentajeHoras = computed(() =>
   Math.min(100, Math.round((horasSocialesMock.acumuladas / horasSocialesMock.requeridas) * 100))
 )
 
-function imprimirCertificado() {
-  window.print()
+function abrirCertificadoOficial(item) {
+  const p = estudianteMock.programaActual
+  const hoy = new Date()
+  const meses = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ]
+  const fechaFormal = `Expedido en Mocoa, Putumayo, a los ${hoy.getDate()} días del mes de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`
+
+  const html = `<!DOCTYPE html>
+  <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Constancia de Horas Sociales (CIECYT) · ${CODIGO_VERIFICACION}</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          padding: 0;
+          background-color: #323639;
+          font-family: 'Fira Sans', Arial, sans-serif;
+          color: #111827;
+        }
+        .viewer-bar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 52px;
+          background-color: #202124;
+          color: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+          z-index: 100;
+        }
+        .viewer-title { font-size: 0.92rem; font-weight: 600; }
+        .print-btn {
+          background-color: #185686;
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 16px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .print-btn:hover { background-color: #0f4766; }
+        .sheet {
+          width: 816px;
+          min-height: 1056px;
+          background: #ffffff;
+          color: #111827;
+          padding: 56px 64px;
+          margin: 76px auto 32px;
+          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+          display: flex;
+          flex-direction: column;
+        }
+        .inst-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          padding-bottom: 16px;
+          border-bottom: 2px solid #185686;
+          margin-bottom: 34px;
+        }
+        .brand-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .brand-texts h2 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 800;
+          color: #185686;
+        }
+        .brand-texts p {
+          margin: 2px 0 0;
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: #334155;
+        }
+        .letterhead-right {
+          text-align: right;
+          font-size: 0.74rem;
+          line-height: 1.4;
+          color: #334155;
+          font-weight: 600;
+        }
+        .solemn-title {
+          text-align: center;
+          font-size: 0.96rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin: 0 0 8px;
+        }
+        .hace-constar {
+          text-align: center;
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: #185686;
+          margin: 0 0 28px;
+          letter-spacing: 0.04em;
+        }
+        .formal-body {
+          margin: 0 0 28px;
+          font-size: 0.96rem;
+          line-height: 1.75;
+          text-align: justify;
+        }
+        .tech-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.84rem;
+          margin-bottom: 36px;
+        }
+        .tech-table td {
+          border: 1px solid #cbd5e1;
+          padding: 10px 12px;
+          vertical-align: top;
+        }
+        .tech-label {
+          width: 30%;
+          background-color: #f8fafc;
+          font-weight: 700;
+          color: #334155;
+        }
+        .issue-date {
+          font-size: 0.88rem;
+          color: #334155;
+          margin: 0 0 64px;
+        }
+        .signature-block {
+          margin-top: auto;
+          text-align: center;
+        }
+        .sig-line {
+          width: 340px;
+          margin: 0 auto 8px;
+          border-top: 1.5px solid #1e293b;
+        }
+        .sig-title {
+          font-size: 0.84rem;
+          font-weight: 700;
+          color: #111827;
+        }
+        .sig-sub {
+          font-size: 0.78rem;
+          color: #475569;
+          margin-top: 2px;
+        }
+        .verify-footer {
+          margin-top: 28px;
+          padding-top: 12px;
+          border-top: 1px solid #cbd5e1;
+          font-size: 0.74rem;
+          color: #475569;
+          text-align: center;
+          font-weight: 600;
+        }
+        @media print {
+          .no-print { display: none !important; }
+          body { background: #ffffff; }
+          .sheet {
+            width: 100%;
+            min-height: auto;
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="viewer-bar no-print">
+        <span class="viewer-title">Vista previa — Constancia de Horas Sociales (CIECYT)</span>
+        <button class="print-btn" onclick="window.print()">Imprimir / Guardar como PDF</button>
+      </div>
+
+      <main class="sheet">
+        <header class="inst-header">
+          <div class="brand-left">
+            <svg width="42" height="46" viewBox="0 0 42 46" fill="none" aria-label="Logo UNIPUTUMAYO">
+              <circle cx="21" cy="11" r="6" fill="#80BF1F" />
+              <circle cx="21" cy="11" r="3" fill="#F5A51D" />
+              <path d="M7 15V27C7 35.28 13.27 41.5 21 41.5C28.73 41.5 35 35.28 35 27V15H28.5V27C28.5 31.69 25.14 35 21 35C16.86 35 13.5 31.69 13.5 27V15H7Z" fill="#185686" />
+            </svg>
+            <div class="brand-texts">
+              <h2>UNIPUTUMAYO</h2>
+              <p>INSTITUCIÓN UNIVERSITARIA DEL PUTUMAYO</p>
+              <p>NIT. 800.247.940</p>
+            </div>
+          </div>
+
+          <div class="letterhead-right">
+            <div>CENTRO DE INVESTIGACIÓN, EXTENSIÓN Y PROYECCIÓN SOCIAL · CIECYT</div>
+            <div>Sede Mocoa · Putumayo</div>
+          </div>
+        </header>
+
+        <h1 class="solemn-title">EL CENTRO DE INVESTIGACIÓN, EXTENSIÓN Y PROYECCIÓN SOCIAL (CIECYT)</h1>
+        <h2 class="hace-constar">HACE CONSTAR QUE:</h2>
+
+        <p class="formal-body">
+          <strong>${estudianteMock.nombreCompleto}</strong>, identificado(a) con cédula de ciudadanía N.°
+          <strong>${estudianteMock.identificacion}</strong>, estudiante activo(a) del programa
+          <strong>${p.programa}</strong> (SNIES ${p.snies}), cumplió satisfactoriamente con el requisito de
+          <strong>sesenta (${item.horas}) horas</strong> de proyección social comunitaria en el periodo académico
+          <strong>${item.periodo}</strong>.
+        </p>
+
+        <table class="tech-table">
+          <tbody>
+            <tr>
+              <td class="tech-label">Proyecto / Propuesta</td>
+              <td>${item.titulo}</td>
+            </tr>
+            <tr>
+              <td class="tech-label">Supervisor Académico</td>
+              <td>${item.supervisor} (${item.supervisorCorreo})</td>
+            </tr>
+            <tr>
+              <td class="tech-label">Intensidad Certificada</td>
+              <td>${item.horas} Horas (100% Cumplido)</td>
+            </tr>
+            <tr>
+              <td class="tech-label">Estado Final</td>
+              <td><strong>APROBADO Y FINALIZADO</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="issue-date">${fechaFormal}.</p>
+
+        <div class="signature-block">
+          <div class="sig-line"></div>
+          <div class="sig-title">COORDINACIÓN GENERAL DE PROYECCIÓN SOCIAL · CIECYT</div>
+          <div class="sig-sub">Institución Universitaria del Putumayo</div>
+        </div>
+
+        <div class="verify-footer">
+          Código de verificación digital: ${CODIGO_VERIFICACION}
+        </div>
+      </main>
+    </body>
+  </html>`
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 </script>
 
@@ -147,7 +367,7 @@ function imprimirCertificado() {
 }
 
 .section-heading {
-  margin: 28px 0 14px;
+  margin: 18px 0 6px;
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -167,9 +387,23 @@ function imprimirCertificado() {
   margin-top: 2px;
 }
 
+.hours-count-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .hours-count-line {
   font-size: 0.92rem;
   color: var(--text-primary);
+}
+
+.verify-code-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .status-complete {
@@ -311,103 +545,5 @@ function imprimirCertificado() {
 
 .cert-btn:hover {
   background-color: var(--bg-surface-muted);
-}
-
-/* Modal Certificado */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.52);
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  z-index: 65;
-}
-
-.cert-modal {
-  width: 100%;
-  max-width: 560px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-md);
-}
-
-.cert-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.cert-modal-header h3 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.close-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: var(--bg-surface-muted);
-  color: var(--text-primary);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.cert-preview {
-  border: 1px dashed #185686;
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface-muted);
-  padding: 18px;
-  text-align: center;
-}
-
-.cert-institution {
-  font-weight: 700;
-  font-size: 0.96rem;
-  color: #185686;
-}
-
-:root.dark .cert-institution {
-  color: var(--text-brand);
-}
-
-.cert-subtitle {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-
-.cert-body {
-  margin: 14px 0 10px;
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.cert-project {
-  margin: 0 0 12px;
-  font-style: italic;
-  font-weight: 600;
-  font-size: 0.88rem;
-}
-
-.cert-meta {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.cert-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
 }
 </style>

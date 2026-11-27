@@ -1,204 +1,215 @@
 <template>
   <div class="hv-container">
-    <!-- 1. Tarjeta 1 — Cabecera de Identidad -->
-    <section class="card hv-identity-card">
-      <div class="hv-avatar">{{ estudianteMock.iniciales }}</div>
-      <div>
-        <h2 class="hv-name">{{ estudianteMock.nombreCompleto }}</h2>
-        <p class="hv-updated">Datos actualizados el 19 de ago de 2026</p>
-      </div>
-    </section>
+    <!-- Toast / Banner de confirmación de guardado -->
+    <div v-if="saveToast" class="save-success-banner" role="status">
+      ✓ Cambios guardados correctamente
+    </div>
 
-    <!-- 2. Tarjeta 2 — Foto del carnet -->
-    <section class="card hv-photo-card">
-      <div class="photo-preview-box">
-        <img v-if="fotoCarnet" :src="fotoCarnet" alt="Foto del carnet" class="photo-img" />
+    <!-- 1. Tarjeta Maestra de Perfil (Identidad + Foto del carné) -->
+    <section class="master-profile-card">
+      <div class="master-avatar">
+        <img v-if="draftPhoto" :src="draftPhoto" alt="Foto de perfil" class="master-avatar-img" />
         <span v-else>{{ estudianteMock.iniciales }}</span>
       </div>
-      <div class="photo-info">
-        <h3 class="photo-title">Foto del carnet</h3>
-        <p class="photo-desc">
-          Una foto de frente, con fondo claro y sin gafas oscuras. JPG, PNG o WebP de hasta 5 MB.
-          La ajustamos automáticamente al tamaño del carnet.
+
+      <div class="master-info">
+        <h2 class="master-name">{{ estudianteMock.nombreCompleto }}</h2>
+        <p class="master-sub">
+          Código: {{ estudianteMock.programaActual.codigoEstudiante }} · {{ estudianteMock.programaActual.programa }}
         </p>
-        <div class="photo-actions">
-          <input
-            ref="fileInputRef"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            @change="handleFotoChange"
-          />
-          <button type="button" class="outline-blue-btn" @click="fileInputRef?.click()">
-            Subir foto
-          </button>
-          <button v-if="fotoCarnet" type="button" class="text-link-btn" @click="quitarFoto">
-            Quitar foto
-          </button>
-        </div>
+        <span class="master-badge">{{ fechaActualizacionTexto }}</span>
+      </div>
+
+      <div class="master-actions">
+        <input
+          ref="fileInputRef"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          @change="handleFotoChange"
+        />
+        <button type="button" class="outline-blue-btn" @click="fileInputRef?.click()">
+          Subir foto
+        </button>
+        <button v-if="draftPhoto" type="button" class="text-link-btn" @click="quitarFoto">
+          Quitar foto
+        </button>
+        <button
+          v-if="hasPendingChanges"
+          type="button"
+          class="text-link-btn discard-btn"
+          @click="descartarCambios"
+        >
+          Descartar
+        </button>
+        <button
+          type="button"
+          class="save-primary-btn"
+          :disabled="!hasPendingChanges"
+          @click="guardarCambios"
+        >
+          Guardar cambios
+        </button>
       </div>
     </section>
 
-    <!-- 3. Tarjeta 3 — Cuenta de Google -->
+    <!-- 2. Tarjeta de Vinculación de Cuenta Institucional -->
     <section class="card hv-google-card">
       <div class="google-left">
         <div class="google-title-row">
           <span class="google-g-badge" aria-hidden="true">G</span>
           <h3>Cuenta de Google</h3>
         </div>
-        <p class="google-desc" v-if="googleVinculada">
-          Vinculada con <strong>{{ estudianteMock.correoInstitucional }}</strong> · desde el 1 nov.<br />
-          En la pantalla de inicio puedes usar «Continuar con Google».
+        <p v-if="googleVinculada" class="google-desc">
+          Vinculada con <strong>{{ estudianteMock.correoInstitucional }}</strong> · Puedes usar «Continuar con Google» al iniciar sesión.
         </p>
-        <p class="google-desc" v-else>
+        <p v-else class="google-desc">
           Cuenta desvinculada en esta sesión de demostración.
         </p>
       </div>
-      <button type="button" class="text-link-btn" @click="toggleGoogle">
-        {{ googleVinculada ? 'Desvincular' : 'Volver a vincular' }}
+      <button type="button" class="text-link-btn" @click="googleVinculada = !googleVinculada">
+        {{ googleVinculada ? 'Desvincular' : 'Vincular cuenta' }}
       </button>
     </section>
 
-    <!-- 4. Sección RESUMEN DE MIS DATOS -->
+    <!-- 3. Sección RESUMEN DE MIS DATOS (Rejilla simétrica de 2 columnas) -->
     <section class="hv-section">
-      <h2 class="section-heading">RESUMEN DE MIS DATOS</h2>
-
-      <!-- Sub-tarjeta Información básica -->
-      <div class="card sub-card">
-        <h3 class="sub-card-title">Información básica</h3>
-        <div class="data-rows">
-          <div class="data-row">
-            <IdCard :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">Identificación</span>
-              <span class="row-value">{{ estudianteMock.identificacion }}</span>
-            </div>
-            <Lock :size="16" class="lock-icon" title="Solo editable en Admisiones y Registro" />
-          </div>
-
-          <div class="data-row">
-            <Calendar :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">Fecha de nacimiento</span>
-              <span class="row-value">11 de jun de 2006</span>
-            </div>
-            <Lock :size="16" class="lock-icon" title="Solo editable en Admisiones y Registro" />
-          </div>
-
-          <div class="data-row">
-            <User :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">Género</span>
-              <span class="row-value">Masculino</span>
-            </div>
-            <Lock :size="16" class="lock-icon" title="Solo editable en Admisiones y Registro" />
-          </div>
-        </div>
+      <div class="section-header-row">
+        <h2 class="section-heading">RESUMEN DE MIS DATOS</h2>
+        <button type="button" class="outline-blue-btn" @click="cambioModalOpen = true">
+          Solicitar cambio de datos
+        </button>
       </div>
 
-      <!-- Sub-tarjeta Contacto -->
-      <div class="card sub-card">
-        <h3 class="sub-card-title">Contacto</h3>
-        <div class="data-rows">
-          <div class="data-row">
-            <Mail :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">Correo institucional</span>
-              <span class="row-value-inline">
-                <span>{{ estudianteMock.correoInstitucional }}</span>
-                <CheckCircle2 :size="15" class="verified-icon" />
-              </span>
-            </div>
-            <Lock :size="16" class="lock-icon" title="Solo editable en Admisiones y Registro" />
-          </div>
+      <p v-if="cambioFeedback" class="feedback-banner">{{ cambioFeedback }}</p>
 
-          <div
-            v-for="field in contactoEditableFields"
-            :key="field.key"
-            class="data-row"
-          >
-            <component :is="field.icon" :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">{{ field.label }}</span>
-              <div v-if="editingKey === field.key" class="inline-edit-wrap">
-                <input
-                  v-model.trim="editDraft"
-                  :type="field.type"
-                  class="contrast-input"
-                  @keyup.enter="saveInlineEdit(field.key)"
-                />
-                <button type="button" class="save-mini-btn" @click="saveInlineEdit(field.key)">
-                  Guardar
-                </button>
-                <button type="button" class="cancel-mini-btn" @click="cancelInlineEdit">
-                  Cancelar
+      <div class="two-col-grid">
+        <!-- Columna Izquierda: Información básica -->
+        <div class="card sub-card">
+          <h3 class="sub-card-title">Información básica</h3>
+          <div class="data-rows">
+            <div class="data-row">
+              <User :size="17" class="row-icon" />
+              <div class="row-content">
+                <span class="row-label">Nombre completo</span>
+                <span class="row-value">{{ estudianteMock.nombreCompleto }}</span>
+              </div>
+              <Lock :size="16" class="lock-icon" title="Dato protegido" />
+            </div>
+
+            <div class="data-row">
+              <IdCard :size="17" class="row-icon" />
+              <div class="row-content">
+                <span class="row-label">Identificación</span>
+                <span class="row-value">{{ estudianteMock.identificacion }}</span>
+              </div>
+              <Lock :size="16" class="lock-icon" title="Dato protegido" />
+            </div>
+
+            <div class="data-row">
+              <Calendar :size="17" class="row-icon" />
+              <div class="row-content">
+                <span class="row-label">Fecha de nacimiento</span>
+                <span class="row-value">11 de jun de 2006</span>
+              </div>
+              <Lock :size="16" class="lock-icon" title="Dato protegido" />
+            </div>
+
+            <div class="data-row">
+              <UserCheck :size="17" class="row-icon" />
+              <div class="row-content">
+                <span class="row-label">Género</span>
+                <span class="row-value">Masculino</span>
+              </div>
+              <Lock :size="16" class="lock-icon" title="Dato protegido" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Contacto y residencia -->
+        <div class="card sub-card contact-sub-card">
+          <div>
+            <h3 class="sub-card-title">Contacto y residencia</h3>
+            <div class="data-rows">
+              <div class="data-row">
+                <Mail :size="17" class="row-icon" />
+                <div class="row-content">
+                  <span class="row-label">Correo institucional</span>
+                  <span class="row-value-inline">
+                    <span>{{ estudianteMock.correoInstitucional }}</span>
+                    <CheckCircle2 :size="15" class="verified-icon" />
+                  </span>
+                </div>
+                <Lock :size="16" class="lock-icon" title="Dato protegido" />
+              </div>
+
+              <div
+                v-for="field in contactoEditableFields"
+                :key="field.key"
+                class="data-row"
+              >
+                <component :is="field.icon" :size="17" class="row-icon" />
+                <div class="row-content">
+                  <span class="row-label">{{ field.label }}</span>
+                  <div v-if="editingKey === field.key" class="inline-edit-wrap">
+                    <input
+                      v-model.trim="editDraft"
+                      :type="field.type"
+                      class="form-control inline-input"
+                      @keyup.enter="applyInlineDraft(field.key)"
+                    />
+                    <button type="button" class="save-mini-btn" @click="applyInlineDraft(field.key)">
+                      Aplicar
+                    </button>
+                    <button type="button" class="cancel-mini-btn" @click="cancelInlineEdit">
+                      Cancelar
+                    </button>
+                  </div>
+                  <span v-else class="row-value-inline">
+                    <span>{{ draftContact[field.key] }}</span>
+                    <CheckCircle2 v-if="field.verified" :size="15" class="verified-icon" />
+                  </span>
+                </div>
+                <button
+                  v-if="editingKey !== field.key"
+                  type="button"
+                  class="pencil-btn"
+                  :aria-label="`Editar ${field.label}`"
+                  @click="startInlineEdit(field.key)"
+                >
+                  <Pencil :size="16" />
                 </button>
               </div>
-              <span v-else class="row-value-inline">
-                <span>{{ editableData[field.key] }}</span>
-                <CheckCircle2 v-if="field.verified" :size="15" class="verified-icon" />
-              </span>
             </div>
+          </div>
+
+          <div class="contact-save-footer">
             <button
-              v-if="editingKey !== field.key"
+              v-if="hasPendingChanges"
               type="button"
-              class="pencil-btn"
-              :aria-label="`Editar ${field.label}`"
-              @click="startInlineEdit(field.key)"
+              class="text-link-btn discard-btn"
+              @click="descartarCambios"
             >
-              <Pencil :size="16" />
+              Descartar
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-tarjeta Dónde vives -->
-      <div class="card sub-card">
-        <h3 class="sub-card-title">Dónde vives</h3>
-        <div class="data-rows">
-          <div
-            v-for="field in viviendaEditableFields"
-            :key="field.key"
-            class="data-row"
-          >
-            <MapPin :size="17" class="row-icon" />
-            <div class="row-content">
-              <span class="row-label">{{ field.label }}</span>
-              <div v-if="editingKey === field.key" class="inline-edit-wrap">
-                <input
-                  v-model.trim="editDraft"
-                  type="text"
-                  class="contrast-input"
-                  @keyup.enter="saveInlineEdit(field.key)"
-                />
-                <button type="button" class="save-mini-btn" @click="saveInlineEdit(field.key)">
-                  Guardar
-                </button>
-                <button type="button" class="cancel-mini-btn" @click="cancelInlineEdit">
-                  Cancelar
-                </button>
-              </div>
-              <span v-else class="row-value">{{ editableData[field.key] }}</span>
-            </div>
             <button
-              v-if="editingKey !== field.key"
               type="button"
-              class="pencil-btn"
-              :aria-label="`Editar ${field.label}`"
-              @click="startInlineEdit(field.key)"
+              class="save-primary-btn"
+              :disabled="!hasPendingChanges"
+              @click="guardarCambios"
             >
-              <Pencil :size="16" />
+              Guardar cambios
             </button>
           </div>
         </div>
       </div>
 
       <p class="hv-footnote">
-        Pulsa un dato con lápiz para cambiarlo. Los que tienen candado solo se corrigen en Admisiones y Registro.
+        Pulsa un dato con lápiz para modificarlo en borrador y luego presiona «Guardar cambios». Los que tienen candado requieren «Solicitar cambio de datos».
       </p>
     </section>
 
-    <!-- 5. Banner Destacado -->
+    <!-- 4. Banner Destacado -->
     <section class="more-data-banner">
       <div class="banner-left">
         <FolderOpen :size="26" class="banner-icon" />
@@ -215,7 +226,7 @@
       </button>
     </section>
 
-    <!-- 6. Sección Mis programas -->
+    <!-- 5. Sección Mis programas -->
     <section class="programs-block">
       <div class="programs-label">Mis programas</div>
       <div class="card program-card">
@@ -252,49 +263,133 @@
       </div>
     </section>
 
-    <!-- Modal Ver más datos -->
-    <div v-if="moreModalOpen" class="modal-overlay" @click.self="moreModalOpen = false">
-      <div class="modal-card">
+    <!-- Modal Solicitar cambio de datos -->
+    <div v-if="cambioModalOpen" class="modal-overlay" @click.self="cambioModalOpen = false">
+      <div class="modal-card" style="max-width: 540px;">
         <div class="modal-header">
-          <h3>Datos complementarios</h3>
-          <button type="button" class="close-btn" aria-label="Cerrar" @click="moreModalOpen = false">
+          <div>
+            <h3>Solicitar cambio de datos</h3>
+            <p class="modal-subtitle">
+              La solicitud se radicará en Servicios en Línea para validación de Admisiones y Registro.
+            </p>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Cerrar" @click="cambioModalOpen = false">
             <X :size="18" />
           </button>
         </div>
 
-        <form class="more-form" @submit.prevent="saveMoreData">
-          <div class="field-group">
-            <label for="extra-rh">Tipo de sangre (RH)</label>
-            <select id="extra-rh" v-model="extraData.rh" class="contrast-input">
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="AB+">AB+</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label for="extra-eps">EPS</label>
-            <input id="extra-eps" v-model.trim="extraData.eps" type="text" class="contrast-input" required />
-          </div>
-          <div class="field-group">
-            <label for="extra-estrato">Estrato socioeconómico</label>
-            <select id="extra-estrato" v-model="extraData.estrato" class="contrast-input">
-              <option value="1">Estrato 1</option>
-              <option value="2">Estrato 2</option>
-              <option value="3">Estrato 3</option>
-              <option value="4">Estrato 4</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label for="extra-acudiente">Nombre del acudiente</label>
-            <input id="extra-acudiente" v-model.trim="extraData.acudiente" type="text" class="contrast-input" required />
+        <form @submit.prevent="enviarSolicitudCambio">
+          <div class="modal-body">
+            <div>
+              <label for="cambio-campo" class="form-label">Campo protegido a modificar *</label>
+              <select id="cambio-campo" v-model="cambioForm.campo" class="form-control" required>
+                <option value="Nombre completo">Nombre completo</option>
+                <option value="Identificación">Identificación</option>
+                <option value="Fecha de nacimiento">Fecha de nacimiento</option>
+                <option value="Género">Género</option>
+                <option value="Correo institucional">Correo institucional</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="cambio-valor" class="form-label">Nuevo valor correcto *</label>
+              <input
+                id="cambio-valor"
+                v-model.trim="cambioForm.nuevoValor"
+                type="text"
+                class="form-control"
+                placeholder="Escribe exactamente como aparece en tu documento"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="cambio-soporte" class="form-label">
+                <span>Soporte documental</span>
+                <span class="label-hint">Opcional</span>
+              </label>
+              <input
+                id="cambio-soporte"
+                v-model.trim="cambioForm.soporte"
+                type="text"
+                class="form-control"
+                placeholder="Ej. Copia de cédula o registro civil (referencia)"
+              />
+            </div>
+
+            <div>
+              <label for="cambio-motivo" class="form-label">Motivo de la corrección *</label>
+              <textarea
+                id="cambio-motivo"
+                v-model.trim="cambioForm.motivo"
+                rows="3"
+                class="form-control"
+                placeholder="Explica brevemente el motivo del cambio solicitado..."
+                required
+              />
+            </div>
           </div>
 
-          <div class="modal-actions">
+          <div class="modal-footer">
+            <button type="button" class="btn-outline" @click="cambioModalOpen = false">Cancelar</button>
+            <button type="submit" class="btn-primary">Enviar solicitud</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Ver más datos -->
+    <div v-if="moreModalOpen" class="modal-overlay" @click.self="moreModalOpen = false">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>Datos complementarios</h3>
+            <p class="modal-subtitle">Actualiza tu información de salud y contacto familiar.</p>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Cerrar" @click="moreModalOpen = false">
+            <X :size="18" />
+          </button>
+        </div>
+
+        <form @submit.prevent="saveMoreData">
+          <div class="modal-body">
+            <div class="form-row-2">
+              <div>
+                <label for="extra-rh" class="form-label">Tipo de sangre (RH)</label>
+                <select id="extra-rh" v-model="extraData.rh" class="form-control">
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="AB+">AB+</option>
+                </select>
+              </div>
+              <div>
+                <label for="extra-estrato" class="form-label">Estrato socioeconómico</label>
+                <select id="extra-estrato" v-model="extraData.estrato" class="form-control">
+                  <option value="1">Estrato 1</option>
+                  <option value="2">Estrato 2</option>
+                  <option value="3">Estrato 3</option>
+                  <option value="4">Estrato 4</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="extra-eps" class="form-label">EPS *</label>
+              <input id="extra-eps" v-model.trim="extraData.eps" type="text" class="form-control" required />
+            </div>
+
+            <div>
+              <label for="extra-acudiente" class="form-label">Nombre del acudiente *</label>
+              <input id="extra-acudiente" v-model.trim="extraData.acudiente" type="text" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="modal-footer">
             <button type="button" class="btn-outline" @click="moreModalOpen = false">Cancelar</button>
-            <button type="submit" class="save-mini-btn" style="padding: 9px 16px;">Guardar cambios</button>
+            <button type="submit" class="btn-primary">Guardar cambios</button>
           </div>
         </form>
       </div>
@@ -303,7 +398,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import {
   Calendar,
   CheckCircle2,
@@ -313,34 +408,51 @@ import {
   Mail,
   MapPin,
   Pencil,
-  Phone,
   Smartphone,
   User,
+  UserCheck,
   X
 } from 'lucide-vue-next'
 import { estudianteMock } from '@/data/mockData'
 
-const DATA_KEY = 'sigedin_mis_datos'
-const PHOTO_KEY = 'sigedin_carnet_foto'
+const CONTACT_KEY = 'sigedin_user_contact'
+const PHOTO_KEY = 'sigedin_user_photo'
 const EXTRA_KEY = 'sigedin_mis_datos_extra'
+const SOLICITUDES_KEY = 'sigedin_solicitudes_radicadas'
 
 const fileInputRef = ref(null)
-const fotoCarnet = ref(localStorage.getItem(PHOTO_KEY) || '')
+const savedPhoto = ref(localStorage.getItem(PHOTO_KEY) || '')
+const draftPhoto = ref(savedPhoto.value)
+const fechaActualizacionTexto = ref(
+  localStorage.getItem(CONTACT_KEY) || localStorage.getItem(PHOTO_KEY)
+    ? 'Datos actualizados hoy'
+    : 'Datos actualizados el 19 de ago de 2026'
+)
+
 const googleVinculada = ref(true)
 const editingKey = ref(null)
 const editDraft = ref('')
 const moreModalOpen = ref(false)
+const cambioModalOpen = ref(false)
+const cambioFeedback = ref('')
+const saveToast = ref(false)
+let toastTimer = null
 
-function loadEditableData() {
+const cambioForm = reactive({
+  campo: 'Nombre completo',
+  nuevoValor: '',
+  soporte: '',
+  motivo: ''
+})
+
+function loadSavedContact() {
   const defaults = {
     correoPersonal: estudianteMock.correoPersonal,
     celular: estudianteMock.celular,
-    telefono: estudianteMock.celular,
-    barrio: estudianteMock.barrio,
-    direccion: estudianteMock.direccion
+    direccionResidencia: `${estudianteMock.direccion} · ${estudianteMock.barrio} (Mocoa)`
   }
   try {
-    const raw = localStorage.getItem(DATA_KEY)
+    const raw = localStorage.getItem(CONTACT_KEY)
     return raw ? { ...defaults, ...JSON.parse(raw) } : defaults
   } catch {
     return defaults
@@ -362,44 +474,75 @@ function loadExtraData() {
   }
 }
 
-const editableData = reactive(loadEditableData())
+const savedContact = reactive(loadSavedContact())
+const draftContact = reactive({ ...savedContact })
 const extraData = reactive(loadExtraData())
 
 const contactoEditableFields = [
   { key: 'correoPersonal', label: 'Correo personal', type: 'email', icon: Mail, verified: true },
-  { key: 'celular', label: 'Celular', type: 'tel', icon: Smartphone, verified: false },
-  { key: 'telefono', label: 'Teléfono', type: 'tel', icon: Phone, verified: false }
+  { key: 'celular', label: 'Teléfono celular', type: 'tel', icon: Smartphone, verified: false },
+  { key: 'direccionResidencia', label: 'Dirección / Municipio', type: 'text', icon: MapPin, verified: false }
 ]
 
-const viviendaEditableFields = [
-  { key: 'barrio', label: 'Barrio o vereda' },
-  { key: 'direccion', label: 'Dirección' }
-]
+const hasPendingChanges = computed(
+  () =>
+    draftPhoto.value !== savedPhoto.value ||
+    draftContact.correoPersonal !== savedContact.correoPersonal ||
+    draftContact.celular !== savedContact.celular ||
+    draftContact.direccionResidencia !== savedContact.direccionResidencia
+)
+
+function compressImageDataUrl(dataUrl, maxDim = 400) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width > maxDim || height > maxDim) {
+        if (width >= height) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        } else {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        resolve(dataUrl)
+        return
+      }
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
 
 function handleFotoChange(event) {
   const file = event.target.files?.[0]
   if (!file) return
+  if (file.size > 5 * 1024 * 1024) return
+
   const reader = new FileReader()
-  reader.onload = () => {
-    const result = String(reader.result || '')
-    fotoCarnet.value = result
-    localStorage.setItem(PHOTO_KEY, result)
+  reader.onload = async () => {
+    const rawUrl = String(reader.result || '')
+    draftPhoto.value = await compressImageDataUrl(rawUrl, 400)
   }
   reader.readAsDataURL(file)
 }
 
 function quitarFoto() {
-  fotoCarnet.value = ''
-  localStorage.removeItem(PHOTO_KEY)
-}
-
-function toggleGoogle() {
-  googleVinculada.value = !googleVinculada.value
+  draftPhoto.value = ''
+  if (fileInputRef.value) fileInputRef.value.value = ''
 }
 
 function startInlineEdit(key) {
   editingKey.value = key
-  editDraft.value = editableData[key] || ''
+  editDraft.value = draftContact[key] || ''
 }
 
 function cancelInlineEdit() {
@@ -407,17 +550,91 @@ function cancelInlineEdit() {
   editDraft.value = ''
 }
 
-function saveInlineEdit(key) {
+function applyInlineDraft(key) {
   if (!editDraft.value) return
-  editableData[key] = editDraft.value
-  localStorage.setItem(DATA_KEY, JSON.stringify({ ...editableData }))
+  draftContact[key] = editDraft.value
   editingKey.value = null
+}
+
+function descartarCambios() {
+  draftPhoto.value = savedPhoto.value
+  Object.assign(draftContact, savedContact)
+  editingKey.value = null
+  if (fileInputRef.value) fileInputRef.value.value = ''
+}
+
+function guardarCambios() {
+  if (draftPhoto.value) {
+    localStorage.setItem(PHOTO_KEY, draftPhoto.value)
+  } else {
+    localStorage.removeItem(PHOTO_KEY)
+  }
+  savedPhoto.value = draftPhoto.value
+
+  localStorage.setItem(CONTACT_KEY, JSON.stringify({ ...draftContact }))
+  Object.assign(savedContact, draftContact)
+
+  fechaActualizacionTexto.value = 'Datos actualizados hoy'
+  window.dispatchEvent(new Event('profile-photo-updated'))
+
+  saveToast.value = true
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    saveToast.value = false
+  }, 3000)
 }
 
 function saveMoreData() {
   localStorage.setItem(EXTRA_KEY, JSON.stringify({ ...extraData }))
   moreModalOpen.value = false
 }
+
+function enviarSolicitudCambio() {
+  if (!cambioForm.nuevoValor || !cambioForm.motivo) return
+
+  let existentes = []
+  try {
+    const raw = localStorage.getItem(SOLICITUDES_KEY)
+    existentes = raw ? JSON.parse(raw) : []
+  } catch {
+    existentes = []
+  }
+
+  const numRad = String(Math.floor(100 + Math.random() * 899))
+  const radicado = `SOL-2026-${numRad}`
+  const nueva = {
+    id: Date.now(),
+    radicado,
+    tipo: 'actualizacion',
+    tipoLabel: 'Actualización de datos',
+    detalle: `${cambioForm.campo} → ${cambioForm.nuevoValor}. ${cambioForm.motivo}${cambioForm.soporte ? ` (Soporte: ${cambioForm.soporte})` : ''}`,
+    fecha: new Date().toISOString().slice(0, 10),
+    estado: 'En revisión'
+  }
+
+  localStorage.setItem(SOLICITUDES_KEY, JSON.stringify([nueva, ...existentes]))
+  cambioFeedback.value = `Solicitud ${radicado} radicada correctamente. Puedes consultarla en Servicios en Línea → Solicitudes.`
+
+  cambioForm.nuevoValor = ''
+  cambioForm.soporte = ''
+  cambioForm.motivo = ''
+  cambioModalOpen.value = false
+}
+
+function syncFromExternal() {
+  const p = localStorage.getItem(PHOTO_KEY) || ''
+  savedPhoto.value = p
+  draftPhoto.value = p
+}
+
+onMounted(() => {
+  window.addEventListener('storage', syncFromExternal)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', syncFromExternal)
+  if (toastTimer) clearTimeout(toastTimer)
+})
 </script>
 
 <style scoped>
@@ -430,82 +647,111 @@ function saveMoreData() {
   gap: 20px;
 }
 
-/* Tarjeta 1 */
-.hv-identity-card {
+.save-success-banner {
+  padding: 11px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #65a30d;
+  background-color: rgba(101, 163, 13, 0.16);
+  color: #3f6212;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+:root.dark .save-success-banner {
+  color: #bef264;
+}
+
+/* 1. Tarjeta Maestra de Perfil */
+.master-profile-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid #185686;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px 28px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.hv-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background-color: #185686;
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.hv-name {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.hv-updated {
-  margin: 2px 0 0;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-/* Tarjeta 2 */
-.hv-photo-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.photo-preview-box {
-  width: 68px;
-  height: 68px;
-  border-radius: 8px;
-  background-color: #185686;
-  color: #ffffff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
+.master-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
   overflow: hidden;
+  background-color: #185686;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
 }
 
-.photo-img {
+.master-avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.photo-title {
+.master-info {
+  flex: 1;
+  min-width: 220px;
+}
+
+.master-name {
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 1.18rem;
   font-weight: 700;
+  color: var(--text-primary);
 }
 
-.photo-desc {
-  margin: 4px 0 10px;
-  font-size: 0.83rem;
+.master-sub {
+  margin: 4px 0 8px;
+  font-size: 0.84rem;
   color: var(--text-secondary);
-  line-height: 1.45;
 }
 
-.photo-actions {
+.master-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background-color: var(--bg-surface-muted);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.master-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.save-primary-btn {
+  border: none;
+  border-radius: 6px;
+  background-color: #185686;
+  color: #ffffff;
+  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.save-primary-btn:hover:not(:disabled) {
+  background-color: #0f4766;
+}
+
+.save-primary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .outline-blue-btn {
@@ -513,9 +759,10 @@ function saveMoreData() {
   color: #185686;
   background: var(--bg-surface);
   border-radius: 6px;
-  padding: 6px 14px;
+  padding: 7px 14px;
   font-size: 0.84rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -524,11 +771,15 @@ function saveMoreData() {
   color: var(--text-brand);
 }
 
+.outline-blue-btn:hover {
+  background-color: var(--bg-surface-muted);
+}
+
 .text-link-btn {
   border: none;
   background: transparent;
   color: #185686;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   padding: 4px 6px;
@@ -538,11 +789,16 @@ function saveMoreData() {
   color: var(--text-brand);
 }
 
-/* Tarjeta 3 */
+.discard-btn {
+  color: var(--text-secondary);
+}
+
+/* 2. Cuenta de Google */
 .hv-google-card {
+  padding: 16px 22px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 14px;
   flex-wrap: wrap;
 }
@@ -571,17 +827,32 @@ function saveMoreData() {
 }
 
 .google-desc {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 0.83rem;
   color: var(--text-secondary);
   line-height: 1.45;
 }
 
-/* Sección RESUMEN DE MIS DATOS */
+/* 3. Resumen en 2 columnas */
 .hv-section {
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
+  margin-top: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #185686;
+}
+
+:root.dark .section-header-row {
+  border-bottom-color: var(--text-brand);
 }
 
 .section-heading {
@@ -590,18 +861,51 @@ function saveMoreData() {
   font-weight: 700;
   text-transform: uppercase;
   color: #185686;
-  padding-bottom: 6px;
-  border-bottom: 1.5px solid #185686;
 }
 
 :root.dark .section-heading {
   color: var(--text-brand);
-  border-bottom-color: var(--text-brand);
+}
+
+.feedback-banner {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: rgba(101, 163, 13, 0.14);
+  color: #4d7c0f;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+:root.dark .feedback-banner {
+  color: #bef264;
+}
+
+.two-col-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.contact-sub-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.contact-save-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
 }
 
 .sub-card-title {
   margin: 0 0 10px;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -642,7 +946,7 @@ function saveMoreData() {
 }
 
 .row-value {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
@@ -650,7 +954,7 @@ function saveMoreData() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
@@ -690,22 +994,10 @@ function saveMoreData() {
   margin-top: 4px;
 }
 
-.contrast-input {
+.inline-input {
   flex: 1;
-  min-width: 180px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1.5px solid #94a3b8;
-  background-color: #f8fafc;
-  color: #0f172a;
-  font-family: inherit;
-  font-size: 0.88rem;
-}
-
-:root.dark .contrast-input {
-  background-color: #0f172a;
-  border-color: #475569;
-  color: #f8fafc;
+  min-width: 160px;
+  padding: 7px 10px;
 }
 
 .save-mini-btn {
@@ -736,7 +1028,7 @@ function saveMoreData() {
   color: var(--text-secondary);
 }
 
-/* 5. Banner Destacado */
+/* 4. Banner Destacado */
 .more-data-banner {
   background-color: #0e4268;
   border-left: 4px solid #f59e0b;
@@ -788,7 +1080,7 @@ function saveMoreData() {
   white-space: nowrap;
 }
 
-/* 6. Mis programas */
+/* 5. Mis programas */
 .programs-block {
   display: flex;
   flex-direction: column;
@@ -854,74 +1146,5 @@ function saveMoreData() {
 .pg-value {
   font-size: 0.9rem;
   font-weight: 600;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.54);
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  z-index: 65;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 450px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-md);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.close-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: var(--bg-surface-muted);
-  color: var(--text-primary);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.more-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.field-group label {
-  font-size: 0.84rem;
-  font-weight: 700;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
 }
 </style>

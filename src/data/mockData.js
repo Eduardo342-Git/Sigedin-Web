@@ -242,16 +242,16 @@ export const boletinesPorPeriodoMock = {
     enCurso: true,
     semestre: 'SEXTO SEMESTRE - C',
     estadoEstudiante: 'MATRICULADO',
-    promedioPonderado: null,
+    promedioPonderado: 3.91,
     promedioSemestre: null,
     creditos: 11,
     unidades: [
-      { codigo: 'EC01', unidad: 'ELECTIVA COMPLEMENTARIA I', ihs: 2, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
-      { codigo: 'TD605', unidad: 'ELECTIVA PROFESIONAL III', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
-      { codigo: 'TD603', unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
-      { codigo: 'TD601', unidad: 'PROGRAMACIÓN FRONTEND', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
-      { codigo: 'TD602', unidad: 'PROYECTO DE SOFTWARE III', ihs: 3, creditos: 1, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
-      { codigo: 'TD604', unidad: 'TELEMÁTICA', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' }
+      { codigo: 'EC01', unidad: 'ELECTIVA COMPLEMENTARIA I', ihs: 2, creditos: 2, c1: 4.5, c2: 4.4, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD605', unidad: 'ELECTIVA PROFESIONAL III', ihs: 4, creditos: 2, c1: 4.2, c2: 3.9, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD603', unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE', ihs: 4, creditos: 2, c1: 4.4, c2: 4.1, c3: null, faltas: 1, estado: 'En curso' },
+      { codigo: 'TD601', unidad: 'PROGRAMACIÓN FRONTEND', ihs: 4, creditos: 2, c1: 4.8, c2: 4.6, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD602', unidad: 'PROYECTO DE SOFTWARE III', ihs: 3, creditos: 1, c1: 4.3, c2: 4.5, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD604', unidad: 'TELEMÁTICA', ihs: 4, creditos: 2, c1: 3.6, c2: 4.2, c3: null, faltas: 2, estado: 'En curso' }
     ]
   },
   '2026-1': {
@@ -420,6 +420,32 @@ export const planEstudiosMock = {
     }
   ]
 }
+
+export const prerrequisitosMallaMock = [
+  // Ruta de programación y software
+  { from: 'TD103', to: 'TD202' },
+  { from: 'TD202', to: 'TD201' },
+  { from: 'TD201', to: 'TD301' },
+  { from: 'TD301', to: 'TD401' },
+  { from: 'TD401', to: 'TD501' },
+  { from: 'TD501', to: 'TD603' },
+  // Ruta de análisis, diseño y pruebas
+  { from: 'TD302', to: 'TD403' },
+  { from: 'TD403', to: 'TD503' },
+  { from: 'TD503', to: 'TD603' },
+  // Ruta de bases de datos
+  { from: 'TD303', to: 'TD404' },
+  { from: 'TD404', to: 'TD504' },
+  // Ruta de redes y telemática
+  { from: 'TD405', to: 'TD505' },
+  { from: 'TD505', to: 'TD604' },
+  // Ruta de matemáticas y física
+  { from: 'TD102', to: 'BAS04' },
+  { from: 'BAS01', to: 'BAS02' },
+  { from: 'BAS02', to: 'BAS03' },
+  // Ruta de investigación
+  { from: 'INST04', to: 'INST05' }
+]
 
 export const requisitosMatriculaMock = {
   periodo: '2026-2',

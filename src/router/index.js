@@ -9,7 +9,6 @@ import CursosGradoView from '@/views/CursosGradoView.vue'
 import BienestarView from '@/views/BienestarView.vue'
 import PropuestaGradoView from '@/views/PropuestaGradoView.vue'
 import HorasSocialesView from '@/views/HorasSocialesView.vue'
-import EvaluacionDocenteView from '@/views/EvaluacionDocenteView.vue'
 import SolicitudesView from '@/views/SolicitudesView.vue'
 import PazYSalvoView from '@/views/PazYSalvoView.vue'
 import HojaVidaView from '@/views/HojaVidaView.vue'
@@ -82,9 +81,7 @@ const routes = [
       },
       {
         path: 'evaluacion-docente',
-        name: 'evaluacion-docente',
-        component: EvaluacionDocenteView,
-        meta: { title: 'Evaluación Docente' }
+        redirect: '/'
       },
       {
         path: 'servicios',
