@@ -1,0 +1,1 @@
+import{Z as e,bt as t}from"./useApi-CUWMwLLw-BDMQ-lPz.js";var n=e({name:`QSpace`,setup(){let e=t(`div`,{class:`q-space`});return()=>e}});export{n as t};

@@ -1,0 +1,1 @@
+var e=`/assets/logo-blanco-CbaISt67.png`;export{e as t};

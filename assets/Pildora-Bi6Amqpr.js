@@ -1,0 +1,1 @@
+import{It as e,Nt as t,Sn as n,_t as r,ft as i}from"./useApi-CUWMwLLw-BDMQ-lPz.js";import{t as a}from"./_plugin-vue_export-helper-BDNMzG2s.js";var o=a(r({__name:`Pildora`,props:{tono:{default:`neutro`}},setup(r){return(a,o)=>(t(),i(`span`,{class:n([`pildora`,`t-${r.tono}`])},[e(a.$slots,`default`,{},void 0,!0)],2))}}),[[`__scopeId`,`data-v-b1572fef`]]);export{o as t};
