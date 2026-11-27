@@ -1,1 +1,0 @@
-var e=`/assets/logo-color-YsON-t9j.png`,t=`/assets/fondo-BbuPxbBT.jpg`;export{e as n,t};
