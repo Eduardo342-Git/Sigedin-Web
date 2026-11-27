@@ -3,9 +3,9 @@
     <section class="card">
       <div class="header-line">
         <div>
-          <h2 class="card-title" style="margin-bottom: 4px;">Requisitos de Inscripción y Matrícula</h2>
-          <p class="muted-text" style="margin: 0;">
-            Periodo {{ requisitosMatriculaMock.periodo }} · {{ requisitosMatriculaMock.sede }} · {{ requisitosMatriculaMock.semestre }}
+          <h2 class="req-title">Requisitos de matrícula</h2>
+          <p class="req-subtitle">
+            {{ estudianteMock.programaActual.programa }} · {{ requisitosMatriculaMock.periodo }} · {{ requisitosMatriculaMock.semestre }}
           </p>
         </div>
         <span class="badge badge-success">{{ requisitosMatriculaMock.estadoGeneral }}</span>
@@ -38,10 +38,30 @@
 </template>
 
 <script setup>
-import { requisitosMatriculaMock } from '@/data/mockData'
+import { estudianteMock, requisitosMatriculaMock } from '@/data/mockData'
 </script>
 
 <style scoped>
+.req-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #185686;
+}
+
+:root.dark .req-title {
+  color: var(--text-brand);
+}
+
+.req-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 .header-line {
   display: flex;
   justify-content: space-between;

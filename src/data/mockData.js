@@ -2,6 +2,7 @@
 
 export const estudianteMock = {
   identificacion: '1098765432',
+  primerNombre: 'Camilo',
   nombres: 'CAMILO ANDRES',
   apellidos: 'MARTINEZ LOPEZ',
   nombreCompleto: 'CAMILO ANDRES MARTINEZ LOPEZ',
@@ -24,97 +25,194 @@ export const estudianteMock = {
     periodo: '2026-2',
     estado: 'MATRICULADO'
   },
-  diasSinActualizarDatos: 24,
+  diasSinActualizarDatos: 98,
   limiteActualizarDatos: 90
 }
 
-export const horarioMock = {
-  periodo: '2026-2',
-  dias: [
+export const franjasHorarioMock = [
+  '8:00 – 9:00 a. m.',
+  '9:00 – 10:00 a. m.',
+  '10:00 – 11:00 a. m.',
+  '11:00 a. m. – 12:00 p. m.',
+  '6:30 – 7:30 p. m.',
+  '7:30 – 8:30 p. m.',
+  '8:45 – 9:45 p. m.',
+  '9:45 – 10:45 p. m.'
+]
+
+export const periodosHorarioMock = [
+  { id: '2026-2', label: '2026-2 • en curso', enCurso: true },
+  { id: '2026-1', label: '2026-1', enCurso: false },
+  { id: '2025-2', label: '2025-2', enCurso: false }
+]
+
+export const horariosPorPeriodoMock = {
+  '2026-2': [
     {
       dia: 1,
-      nombre: 'Lunes',
-      bloques: [
-        {
-          inicio: '18:30',
-          fin: '21:45',
-          unidad: 'PROYECTO DE SOFTWARE III',
-          docente: 'LUIS JURADO',
-          salon: 'SALON A119 - SALA DE COMPUTO 4'
-        }
-      ]
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD602',
+      unidad: 'PROYECTO DE SOFTWARE III',
+      docente: 'LUIS JURADO',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 1,
+      horario: 'Lunes 6:30 – 8:30 p. m.'
     },
     {
       dia: 2,
-      nombre: 'Martes',
-      bloques: [
-        {
-          inicio: '18:30',
-          fin: '20:30',
-          unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE',
-          docente: 'EDWARD ALEGRIA',
-          salon: 'SALON A118 - SALA DE COMPUTO 5'
-        }
-      ]
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD603',
+      unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE',
+      docente: 'EDWARD ALEGRIA',
+      salon: 'SALON A118 - SALA DE COMPUTO 5',
+      creditos: 2,
+      horario: 'Martes 6:30 – 8:30 p. m.'
     },
     {
       dia: 3,
-      nombre: 'Miércoles',
-      bloques: [
-        {
-          inicio: '18:30',
-          fin: '20:30',
-          unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE',
-          docente: 'EDWARD ALEGRIA',
-          salon: 'AULA C-209'
-        },
-        {
-          inicio: '20:45',
-          fin: '22:45',
-          unidad: 'ELECTIVA COMPLEMENTARIA I',
-          docente: 'RAUL RODRIGUEZ',
-          salon: 'SALON A119 - SALA DE COMPUTO 4'
-        }
-      ]
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD603',
+      unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE',
+      docente: 'EDWARD ALEGRIA',
+      salon: 'AULA C-209',
+      creditos: 2,
+      horario: 'Miércoles 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 3,
+      rowStart: 6,
+      rowSpan: 2,
+      codigo: 'EC01',
+      unidad: 'ELECTIVA COMPLEMENTARIA I',
+      docente: 'RAUL RODRIGUEZ',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 2,
+      horario: 'Miércoles 8:45 – 10:45 p. m.',
+      bg: '#B7F072',
+      color: '#1A2E05'
     },
     {
       dia: 4,
-      nombre: 'Jueves',
-      bloques: [
-        {
-          inicio: '18:30',
-          fin: '22:45',
-          unidad: 'TELEMÁTICA',
-          docente: 'DANIEL CERON',
-          salon: 'SALON A119 - SALA DE COMPUTO 4'
-        }
-      ]
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD604',
+      unidad: 'TELEMÁTICA',
+      docente: 'DANIEL CERON',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 2,
+      horario: 'Jueves 6:30 – 8:30 p. m.'
     },
     {
       dia: 5,
-      nombre: 'Viernes',
-      bloques: [
-        {
-          inicio: '18:30',
-          fin: '22:45',
-          unidad: 'PROGRAMACIÓN FRONTEND',
-          docente: 'HENRY ROSERO',
-          salon: 'SALON A118 - SALA DE COMPUTO 5'
-        }
-      ]
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD601',
+      unidad: 'PROGRAMACIÓN FRONTEND',
+      docente: 'HENRY ROSERO',
+      salon: 'SALON A118 - SALA DE COMPUTO 5',
+      creditos: 2,
+      horario: 'Viernes 6:30 – 8:30 p. m.'
     },
     {
       dia: 6,
-      nombre: 'Sábado',
-      bloques: [
-        {
-          inicio: '08:00',
-          fin: '12:00',
-          unidad: 'ELECTIVA PROFESIONAL III',
-          docente: 'RAUL RODRIGUEZ',
-          salon: 'MODALIDAD VIRTUAL'
-        }
-      ]
+      rowStart: 0,
+      rowSpan: 4,
+      codigo: 'TD605',
+      unidad: 'ELECTIVA PROFESIONAL III',
+      docente: 'RAUL RODRIGUEZ',
+      salon: 'MODALIDAD VIRTUAL',
+      creditos: 2,
+      horario: 'Sábado 8:00 a. m. – 12:00 p. m.',
+      bg: '#5B0E54',
+      color: '#FFFFFF'
+    }
+  ],
+  '2026-1': [
+    {
+      dia: 1,
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD501',
+      unidad: 'PROGRAMACIÓN BACKEND',
+      docente: 'HENRY ROSERO',
+      salon: 'SALON A118 - SALA DE COMPUTO 5',
+      creditos: 2,
+      horario: 'Lunes 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 2,
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD504',
+      unidad: 'DESARROLLO DE BASE DE DATOS',
+      docente: 'CARLOS MENESES',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 1,
+      horario: 'Martes 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 4,
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD503',
+      unidad: 'PRUEBAS DE SOFTWARE E IMPLEMENTACIÓN',
+      docente: 'EDWARD ALEGRIA',
+      salon: 'AULA C-204',
+      creditos: 2,
+      horario: 'Jueves 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 5,
+      rowStart: 6,
+      rowSpan: 2,
+      codigo: 'TD505',
+      unidad: 'REDES Y COMUNICACIONES II',
+      docente: 'DANIEL CERON',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 2,
+      horario: 'Viernes 8:45 – 10:45 p. m.',
+      bg: '#B7F072',
+      color: '#1A2E05'
+    }
+  ],
+  '2025-2': [
+    {
+      dia: 1,
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD401',
+      unidad: 'PROGRAMACIÓN ORIENTADA A LA WEB',
+      docente: 'HENRY ROSERO',
+      salon: 'SALON A118 - SALA DE COMPUTO 5',
+      creditos: 2,
+      horario: 'Lunes 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 3,
+      rowStart: 4,
+      rowSpan: 2,
+      codigo: 'TD404',
+      unidad: 'DISEÑO DE BASE DE DATOS',
+      docente: 'CARLOS MENESES',
+      salon: 'SALON A119 - SALA DE COMPUTO 4',
+      creditos: 2,
+      horario: 'Miércoles 6:30 – 8:30 p. m.'
+    },
+    {
+      dia: 6,
+      rowStart: 0,
+      rowSpan: 3,
+      codigo: 'ING02',
+      unidad: 'CURSO REQ. GRADO INGLÉS A2',
+      docente: 'FERNANDO CORTEZ',
+      salon: 'AULA B-102',
+      creditos: 0,
+      horario: 'Sábado 8:00 – 11:00 a. m.',
+      bg: '#5B0E54',
+      color: '#FFFFFF'
     }
   ]
 }
@@ -136,6 +234,93 @@ export const boletinMock = {
     { codigo: 'TD602', unidad: 'PROYECTO DE SOFTWARE III', ihs: 3, creditos: 1, p1: 4.3, p2: 4.1, examenFinal: 0, definitiva: 4.2, faltas: 0, estado: 'MATRICULADA' },
     { codigo: 'TD604', unidad: 'TELEMÁTICA', ihs: 4, creditos: 2, p1: 3.6, p2: 3.9, examenFinal: 0, definitiva: 3.8, faltas: 2, estado: 'MATRICULADA' }
   ]
+}
+
+export const boletinesPorPeriodoMock = {
+  '2026-2': {
+    periodo: '2026-2',
+    enCurso: true,
+    semestre: 'SEXTO SEMESTRE - C',
+    estadoEstudiante: 'MATRICULADO',
+    promedioPonderado: null,
+    promedioSemestre: null,
+    creditos: 11,
+    unidades: [
+      { codigo: 'EC01', unidad: 'ELECTIVA COMPLEMENTARIA I', ihs: 2, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD605', unidad: 'ELECTIVA PROFESIONAL III', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD603', unidad: 'METODOLOGÍA DE DESARROLLO DE SOFTWARE', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD601', unidad: 'PROGRAMACIÓN FRONTEND', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD602', unidad: 'PROYECTO DE SOFTWARE III', ihs: 3, creditos: 1, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' },
+      { codigo: 'TD604', unidad: 'TELEMÁTICA', ihs: 4, creditos: 2, c1: null, c2: null, c3: null, faltas: 0, estado: 'En curso' }
+    ]
+  },
+  '2026-1': {
+    periodo: '2026-1',
+    enCurso: false,
+    semestre: 'QUINTO SEMESTRE - C',
+    estadoEstudiante: 'MATRICULADO',
+    promedioPonderado: 3.91,
+    promedioSemestre: 4.05,
+    creditos: 12,
+    unidades: [
+      { codigo: 'TD504', unidad: 'DESARROLLO DE BASE DE DATOS', ihs: 2, creditos: 1, c1: 4.0, c2: 4.2, c3: 4.1, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD506', unidad: 'ELECTIVA PROFESIONAL II', ihs: 4, creditos: 2, c1: 4.2, c2: 4.4, c3: 4.3, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD501', unidad: 'PROGRAMACIÓN BACKEND', ihs: 4, creditos: 2, c1: 2.8, c2: 3.5, c3: 3.5, faltas: 1, estado: 'Aprobada' },
+      { codigo: 'TD502', unidad: 'PROYECTO DE SOFTWARE II', ihs: 3, creditos: 1, c1: 3.9, c2: 4.1, c3: 4.0, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD503', unidad: 'PRUEBAS DE SOFTWARE E IMPLEMENTACIÓN', ihs: 4, creditos: 2, c1: 3.8, c2: 3.9, c3: 4.0, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD505', unidad: 'REDES Y COMUNICACIONES II', ihs: 4, creditos: 2, c1: 4.1, c2: 4.0, c3: 4.2, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'INST05', unidad: 'TÉCNICAS DE INVESTIGACIÓN', ihs: 3, creditos: 2, c1: 4.5, c2: 4.7, c3: 4.6, faltas: 0, estado: 'Aprobada' }
+    ]
+  },
+  '2025-2': {
+    periodo: '2025-2',
+    enCurso: false,
+    semestre: 'CUARTO SEMESTRE - C',
+    estadoEstudiante: 'MATRICULADO',
+    promedioPonderado: 3.85,
+    promedioSemestre: 3.94,
+    creditos: 15,
+    unidades: [
+      { codigo: 'TD404', unidad: 'DISEÑO DE BASE DE DATOS', ihs: 4, creditos: 2, c1: 3.5, c2: 3.8, c3: 3.8, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD403', unidad: 'DISEÑO DE SISTEMAS DE INFORMACIÓN', ihs: 4, creditos: 2, c1: 4.0, c2: 4.0, c3: 4.0, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'BAS03', unidad: 'ECUACIONES DIFERENCIALES', ihs: 4, creditos: 2, c1: 2.7, c2: 3.4, c3: 3.4, faltas: 2, estado: 'Aprobada' },
+      { codigo: 'TD406', unidad: 'ELECTIVA PROFESIONAL I', ihs: 4, creditos: 2, c1: 4.0, c2: 4.2, c3: 4.1, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'INST04', unidad: 'METODOLOGÍA DE LA INVESTIGACIÓN', ihs: 3, creditos: 2, c1: 4.1, c2: 4.0, c3: 4.2, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD401', unidad: 'PROGRAMACIÓN ORIENTADA A LA WEB', ihs: 4, creditos: 2, c1: 3.8, c2: 4.0, c3: 3.9, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD402', unidad: 'PROYECTO DE SOFTWARE I', ihs: 3, creditos: 1, c1: 4.5, c2: 4.7, c3: 4.6, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD405', unidad: 'REDES Y COMUNICACIONES I', ihs: 4, creditos: 2, c1: 3.9, c2: 4.1, c3: 4.0, faltas: 0, estado: 'Aprobada' }
+    ]
+  },
+  '2024-2': {
+    periodo: '2024-2',
+    enCurso: false,
+    semestre: 'SEGUNDO SEMESTRE - C',
+    estadoEstudiante: 'MATRICULADO',
+    promedioPonderado: 3.74,
+    promedioSemestre: 3.72,
+    creditos: 13,
+    unidades: [
+      { codigo: 'BAS04', unidad: 'ÁLGEBRA LINEAL', ihs: 4, creditos: 2, c1: 3.7, c2: 3.9, c3: 3.8, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD202', unidad: 'ALGORÍTMOS Y PROGRAMACIÓN II', ihs: 4, creditos: 2, c1: 3.6, c2: 3.9, c3: 3.9, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'BAS01', unidad: 'CÁLCULO DIFERENCIAL', ihs: 4, creditos: 2, c1: 3.4, c2: 3.5, c3: 3.6, faltas: 1, estado: 'Aprobada' },
+      { codigo: 'TD201', unidad: 'ESTRUCTURA DE DATOS ORIENTADA A OBJETOS', ihs: 5, creditos: 3, c1: 3.2, c2: 3.5, c3: 3.5, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'COM02', unidad: 'LECTURA CRÍTICA', ihs: 3, creditos: 2, c1: 4.1, c2: 4.3, c3: 4.2, faltas: 0, estado: 'Aprobada' }
+    ]
+  },
+  '2024-1': {
+    periodo: '2024-1',
+    enCurso: false,
+    semestre: 'PRIMER SEMESTRE - C',
+    estadoEstudiante: 'MATRICULADO',
+    promedioPonderado: 3.95,
+    promedioSemestre: 3.95,
+    creditos: 13,
+    unidades: [
+      { codigo: 'TD103', unidad: 'ALGORÍTMOS Y PROGRAMACIÓN I', ihs: 4, creditos: 2, c1: 4.2, c2: 4.4, c3: 4.3, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'TD104', unidad: 'INTRODUCCIÓN A LA INGENIERÍA DE SISTEMAS', ihs: 4, creditos: 2, c1: 3.1, c2: 3.4, c3: 3.4, faltas: 0, estado: 'Aprobada' },
+      { codigo: 'INST01', unidad: 'PPI Y CPC', ihs: 2, creditos: 1, c1: 4.2, c2: 4.4, c3: 4.3, faltas: 0, estado: 'Aprobada' }
+    ]
+  }
 }
 
 export const planEstudiosMock = {

@@ -1,5 +1,43 @@
 <template>
   <div class="page-stack">
+    <section v-if="activeTab === 'hoja-vida'" class="card">
+      <h2 class="card-title">Mis Datos Personales</h2>
+      <div class="grid-cards">
+        <div class="stat-card">
+          <div class="stat-label">Nombre completo</div>
+          <div style="font-weight: 700; margin-top: 4px;">{{ estudianteMock.nombreCompleto }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Identificación</div>
+          <div style="font-weight: 700; margin-top: 4px;">{{ estudianteMock.identificacion }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Correo institucional</div>
+          <div style="font-weight: 700; margin-top: 4px;">{{ estudianteMock.correoInstitucional }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Celular</div>
+          <div style="font-weight: 700; margin-top: 4px;">{{ estudianteMock.celular }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section v-else-if="activeTab === 'carnet'" class="card">
+      <h2 class="card-title">Carnet Estudiantil Digital</h2>
+      <p class="muted-text">
+        <strong>{{ estudianteMock.nombreCompleto }}</strong> · Código {{ estudianteMock.programaActual.codigoEstudiante }} ·
+        {{ estudianteMock.programaActual.programa }} ({{ estudianteMock.programaActual.sede }})
+      </p>
+      <span class="badge badge-success">Carnet vigente · Periodo {{ estudianteMock.programaActual.periodo }}</span>
+    </section>
+
+    <section v-else-if="activeTab === 'calendario'" class="card">
+      <h2 class="card-title">Calendario Académico · {{ estudianteMock.programaActual.periodo }}</h2>
+      <p class="muted-text" style="margin: 0;">
+        Inicio de clases: 10 ago 2026 · Exámenes finales: 30 nov – 05 dic 2026 · Cierre de periodo: 12 dic 2026.
+      </p>
+    </section>
+
     <section class="card">
       <h2 class="card-title">Solicitudes Académicas en Línea</h2>
       <p class="muted-text" style="margin-bottom: 14px;">
@@ -47,9 +85,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { pazYSalvoMock, solicitudesCatalogoMock } from '@/data/mockData'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { estudianteMock, pazYSalvoMock, solicitudesCatalogoMock } from '@/data/mockData'
 
+const route = useRoute()
+const activeTab = computed(() => route.query.tab || '')
 const mensaje = ref('')
 
 function solicitar(srv) {

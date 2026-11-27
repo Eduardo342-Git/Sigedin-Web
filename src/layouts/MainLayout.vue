@@ -50,12 +50,21 @@
             </button>
             <div v-show="matriculaExpanded" class="nav-group-children">
               <RouterLink
-                to="/matricula"
+                to="/matricula/requisitos"
                 class="nav-item nav-child"
                 active-class="nav-item-active"
                 @click="onNavClick"
               >
-                <span>Req. Inscripción y Matrícula</span>
+                <span class="flex-1">Req. Inscripción y Matrícula</span>
+              </RouterLink>
+              <RouterLink
+                to="/matricula/registro-unidades"
+                class="nav-item nav-child"
+                active-class="nav-item-active"
+                @click="onNavClick"
+              >
+                <span class="flex-1">Reg. de Unidades y Horario</span>
+                <span class="sidebar-pronto-badge">Pronto</span>
               </RouterLink>
             </div>
           </div>
@@ -95,10 +104,40 @@
             <span>Evaluación Docente</span>
           </RouterLink>
 
-          <RouterLink to="/servicios" class="nav-item" active-class="nav-item-active" @click="onNavClick">
-            <Wifi :size="19" class="nav-icon" />
-            <span>Servicios en Línea</span>
-          </RouterLink>
+          <div class="nav-group">
+            <button
+              type="button"
+              class="nav-item nav-group-trigger"
+              :aria-expanded="serviciosExpanded"
+              @click="serviciosExpanded = !serviciosExpanded"
+            >
+              <Wifi :size="19" class="nav-icon" />
+              <span class="flex-1">Servicios en Línea</span>
+              <ChevronDown
+                :size="17"
+                class="group-arrow"
+                :class="{ rotated: serviciosExpanded }"
+              />
+            </button>
+            <div v-show="serviciosExpanded" class="nav-group-children">
+              <RouterLink
+                to="/servicios/solicitudes"
+                class="nav-item nav-child"
+                active-class="nav-item-active"
+                @click="onNavClick"
+              >
+                <span>Solicitudes</span>
+              </RouterLink>
+              <RouterLink
+                to="/servicios/paz-y-salvo"
+                class="nav-item nav-child"
+                active-class="nav-item-active"
+                @click="onNavClick"
+              >
+                <span>Paz y Salvo</span>
+              </RouterLink>
+            </div>
+          </div>
         </nav>
 
         <div class="sidebar-footer">
@@ -137,12 +176,13 @@
               <Moon v-else :size="19" />
             </button>
 
-            <div class="account-wrap">
+            <div ref="accountWrapRef" class="account-wrap">
               <button
                 class="account-btn"
                 type="button"
                 aria-label="Mi cuenta"
-                @click="accountMenuOpen = !accountMenuOpen"
+                :aria-expanded="accountMenuOpen"
+                @click.stop="accountMenuOpen = !accountMenuOpen"
               >
                 <span class="avatar-circle">{{ estudianteMock.iniciales }}</span>
                 <span class="account-info">
@@ -152,20 +192,91 @@
                 <ChevronDown :size="16" class="account-chevron" />
               </button>
 
-              <div v-if="accountMenuOpen" class="account-dropdown">
-                <div class="dropdown-header">
-                  <strong>{{ estudianteMock.nombreCompleto }}</strong>
-                  <span>{{ estudianteMock.correoInstitucional }}</span>
-                  <span class="badge badge-info" style="margin-top: 6px; width: fit-content;">
-                    Estudiante · {{ estudianteMock.programaActual.codigoEstudiante }}
+              <div v-if="accountMenuOpen" class="account-dropdown" @click.stop>
+                <RouterLink
+                  to="/hoja-de-vida"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <User :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Mis datos</span>
+                </RouterLink>
+
+                <RouterLink
+                  to="/carnet"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <CreditCard :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Carnet</span>
+                </RouterLink>
+
+                <RouterLink
+                  to="/calendario"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <Calendar :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Calendario académico</span>
+                </RouterLink>
+
+                <RouterLink
+                  to="/notas-boletin"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <TrendingUp :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Informes</span>
+                </RouterLink>
+
+                <RouterLink
+                  to="/biblioteca"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <BookOpen :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Biblioteca</span>
+                  <span class="pronto-badge">Pronto</span>
+                </RouterLink>
+
+                <a
+                  href="https://virtual.itp.edu.co/moodle2026-2/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <Globe :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Moodle</span>
+                  <ExternalLink :size="14" class="external-icon" />
+                </a>
+
+                <a
+                  href="https://evadoc.itp.edu.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="dropdown-item"
+                  @click="accountMenuOpen = false"
+                >
+                  <Star :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Evaluación institucional</span>
+                  <ExternalLink :size="14" class="external-icon" />
+                </a>
+
+                <div class="dropdown-divider" />
+
+                <button type="button" class="dropdown-item" @click="actualizarAplicacion">
+                  <RefreshCw :size="17" class="dropdown-icon" />
+                  <span class="dropdown-text-col">
+                    <span class="dropdown-label">Actualizar la aplicación</span>
+                    <span class="dropdown-sub">Borra la memoria del navegador y recarga</span>
                   </span>
-                </div>
-                <RouterLink to="/" class="dropdown-item" @click="accountMenuOpen = false">
-                  Mi ficha académica
-                </RouterLink>
-                <RouterLink to="/servicios" class="dropdown-item" @click="accountMenuOpen = false">
-                  Solicitudes y Paz y Salvo
-                </RouterLink>
+                </button>
+
+                <button type="button" class="dropdown-item dropdown-logout" @click="confirmarSalir">
+                  <LogOut :size="17" class="dropdown-icon" />
+                  <span class="dropdown-label">Salir</span>
+                </button>
               </div>
             </div>
           </div>
@@ -218,6 +329,21 @@
         </div>
       </div>
     </div>
+    <!-- Modal de aviso institucional (Biblioteca / Salir) -->
+    <div v-if="systemModal" class="modal-overlay" @click.self="systemModal = null">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>{{ systemModal.title }}</h3>
+          <button class="icon-btn" type="button" @click="systemModal = null">
+            <X :size="18" />
+          </button>
+        </div>
+        <p class="muted-text">{{ systemModal.message }}</p>
+        <div class="modal-actions">
+          <button class="btn-primary" type="button" @click="systemModal = null">Entendido</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -226,19 +352,28 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   Award,
+  BookOpen,
+  Calendar,
   ChevronDown,
   ChevronLeft,
   ClipboardList,
   Clock,
+  CreditCard,
+  ExternalLink,
   FileEdit,
+  Globe,
   GraduationCap,
   Heart,
   Home,
   Layers,
+  LogOut,
   Menu,
   Moon,
+  RefreshCw,
   Star,
   Sun,
+  TrendingUp,
+  User,
   Wifi,
   X
 } from 'lucide-vue-next'
@@ -248,9 +383,12 @@ const route = useRoute()
 const isMobile = ref(window.innerWidth < 1024)
 const drawerOpen = ref(window.innerWidth >= 1024)
 const matriculaExpanded = ref(true)
+const serviciosExpanded = ref(true)
 const accountMenuOpen = ref(false)
+const accountWrapRef = ref(null)
 const ratingModalOpen = ref(false)
 const ratingValue = ref(5)
+const systemModal = ref(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
 const currentTitle = computed(() => route.meta?.title || 'SIGEDIN Académico')
@@ -260,6 +398,13 @@ function handleResize() {
   if (mobile !== isMobile.value) {
     isMobile.value = mobile
     drawerOpen.value = !mobile
+  }
+}
+
+function handleClickOutsideAccount(event) {
+  if (!accountMenuOpen.value) return
+  if (accountWrapRef.value && !accountWrapRef.value.contains(event.target)) {
+    accountMenuOpen.value = false
   }
 }
 
@@ -280,12 +425,29 @@ function submitRating() {
   ratingModalOpen.value = false
 }
 
+function actualizarAplicacion() {
+  accountMenuOpen.value = false
+  sessionStorage.clear()
+  window.location.reload()
+}
+
+function confirmarSalir() {
+  accountMenuOpen.value = false
+  systemModal.value = {
+    title: 'Sesión finalizada (simulación)',
+    message:
+      'Se ha cerrado tu sesión de demostración para CAMILO ANDRES MARTINEZ LOPEZ en SIGEDIN Académico.'
+  }
+}
+
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  document.addEventListener('click', handleClickOutsideAccount)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+  document.removeEventListener('click', handleClickOutsideAccount)
 })
 </script>
 
@@ -432,6 +594,17 @@ onUnmounted(() => {
   padding-left: 48px;
   min-height: 40px;
   font-size: 0.9rem;
+}
+
+.sidebar-pronto-badge {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
 }
 
 .sidebar-footer {
@@ -581,38 +754,86 @@ onUnmounted(() => {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  width: 270px;
+  min-width: 280px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: 8px;
+  box-shadow: 0 8px 24px rgba(15, 71, 102, 0.16);
+  padding: 6px;
   z-index: 50;
-}
-
-.dropdown-header {
   display: flex;
   flex-direction: column;
-  padding: 8px 10px 10px;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.82rem;
-}
-
-.dropdown-header span {
-  color: var(--text-secondary);
-  font-size: 0.76rem;
 }
 
 .dropdown-item {
-  display: block;
-  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  margin-top: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
 }
 
 .dropdown-item:hover {
   background: var(--bg-surface-muted);
+}
+
+.dropdown-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.dropdown-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.dropdown-text-col {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.dropdown-sub {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.pronto-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1px 7px;
+}
+
+.external-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 8px;
+}
+
+.dropdown-logout {
+  color: var(--color-danger);
+}
+
+.dropdown-logout .dropdown-icon {
+  color: var(--color-danger);
 }
 
 .brand-stripe {
@@ -622,10 +843,8 @@ onUnmounted(() => {
 
 .page-container {
   flex: 1;
-  padding: 20px 22px 84px;
-  max-width: 1240px;
+  padding: 24px 28px 80px;
   width: 100%;
-  margin: 0 auto;
 }
 
 /* Botón flotante de valoración */
@@ -716,7 +935,7 @@ onUnmounted(() => {
   }
 
   .page-container {
-    padding: 14px 14px 80px;
+    padding: 14px 14px 72px;
   }
 }
 </style>
