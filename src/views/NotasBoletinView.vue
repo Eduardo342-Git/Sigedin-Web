@@ -71,7 +71,19 @@
 
     <!-- 4. Bloque 2: UNIDADES DE FORMACIÓN -->
     <section class="boletin-section">
-      <h2 class="section-heading">UNIDADES DE FORMACIÓN</h2>
+      <div class="section-heading-row">
+        <h2 class="section-heading">UNIDADES DE FORMACIÓN</h2>
+        <button
+          type="button"
+          class="toggle-cuts-btn"
+          :class="{ active: showPercentages }"
+          :aria-pressed="showPercentages"
+          @click="showPercentages = !showPercentages"
+        >
+          <Percent :size="14" class="toggle-cuts-icon" />
+          <span>{{ showPercentages ? 'Ver por cortes' : 'Ver por porcentajes' }}</span>
+        </button>
+      </div>
       <div class="boletin-table-card">
         <div class="table-wrap">
           <table class="boletin-table">
@@ -79,17 +91,26 @@
               <tr>
                 <th>Unidad de formación</th>
                 <th class="text-center num-col">Créd.</th>
-                <th class="text-center num-col">
-                  <span>Corte #1</span>
-                  <span class="cut-pct">(30%)</span>
+                <th class="text-center num-col" :title="showPercentages ? 'Corte #1 (30%)' : '30%'">
+                  <Transition name="cut-label" mode="out-in">
+                    <span :key="showPercentages ? 'pct-1' : 'cut-1'" class="cut-label-text">
+                      {{ showPercentages ? '30%' : 'Corte #1' }}
+                    </span>
+                  </Transition>
                 </th>
-                <th class="text-center num-col">
-                  <span>Corte #2</span>
-                  <span class="cut-pct">(30%)</span>
+                <th class="text-center num-col" :title="showPercentages ? 'Corte #2 (30%)' : '30%'">
+                  <Transition name="cut-label" mode="out-in">
+                    <span :key="showPercentages ? 'pct-2' : 'cut-2'" class="cut-label-text">
+                      {{ showPercentages ? '30%' : 'Corte #2' }}
+                    </span>
+                  </Transition>
                 </th>
-                <th class="text-center num-col">
-                  <span>Corte #3</span>
-                  <span class="cut-pct">(40%)</span>
+                <th class="text-center num-col" :title="showPercentages ? 'Corte #3 (40%)' : '40%'">
+                  <Transition name="cut-label" mode="out-in">
+                    <span :key="showPercentages ? 'pct-3' : 'cut-3'" class="cut-label-text">
+                      {{ showPercentages ? '40%' : 'Corte #3' }}
+                    </span>
+                  </Transition>
                 </th>
                 <th class="text-center num-col">Acum.</th>
                 <th class="text-center num-col">Faltas</th>
@@ -138,12 +159,13 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { Download } from 'lucide-vue-next'
+import { Download, Percent } from 'lucide-vue-next'
 import { boletinesPorPeriodoMock, estudianteMock } from '@/data/mockData'
 
 const periodos = ['2026-2', '2026-1', '2025-2', '2024-2', '2024-1']
 const selectedPeriodo = ref('2026-2')
 const pdfFeedback = ref('')
+const showPercentages = ref(false)
 
 const boletinActual = computed(() => boletinesPorPeriodoMock[selectedPeriodo.value])
 
@@ -274,6 +296,91 @@ function descargarBoletin() {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 6px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #185686;
+}
+
+.section-heading-row .section-heading {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+:root.dark .section-heading-row {
+  border-bottom-color: var(--text-brand);
+}
+
+.toggle-cuts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.toggle-cuts-btn:active {
+  transform: scale(0.97);
+}
+
+.toggle-cuts-icon {
+  transition: transform 0.25s ease;
+}
+
+.toggle-cuts-btn.active .toggle-cuts-icon {
+  transform: rotate(180deg);
+}
+
+.cut-label-text {
+  display: inline-block;
+}
+
+.cut-label-enter-active,
+.cut-label-leave-active {
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.cut-label-enter-from {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.cut-label-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.toggle-cuts-btn:hover {
+  background-color: var(--bg-surface-muted);
+  color: var(--text-primary);
+}
+
+.toggle-cuts-btn.active {
+  border-color: #185686;
+  color: #185686;
+  background-color: rgba(24, 86, 134, 0.08);
+}
+
+:root.dark .toggle-cuts-btn.active {
+  border-color: var(--text-brand);
+  color: var(--text-brand);
+  background-color: rgba(125, 211, 252, 0.12);
 }
 
 .section-heading {

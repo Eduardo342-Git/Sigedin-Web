@@ -8,17 +8,25 @@
     />
 
     <!-- Barra lateral institucional (Rol Estudiante) -->
-    <aside class="sidebar" :class="{ 'sidebar-collapsed': !drawerOpen }">
+    <aside
+      class="sidebar"
+      :class="{
+        'sidebar-collapsed': !drawerOpen && isMobile,
+        'sidebar-mini': isSidebarMini
+      }"
+    >
       <div class="sidebar-inner">
         <div class="sidebar-brand">
           <img src="/logo-blanco.png" alt="UniPutumayo - Institución Universitaria del Putumayo" />
           <button
             class="collapse-btn"
             type="button"
-            aria-label="Ocultar el menú"
-            @click="drawerOpen = false"
+            :aria-label="isSidebarMini ? 'Expandir el menú' : 'Contraer el menú'"
+            :title="isSidebarMini ? 'Expandir el menú' : 'Contraer el menú'"
+            @click="drawerOpen = !drawerOpen"
           >
-            <ChevronLeft :size="18" />
+            <ChevronRight v-if="isSidebarMini" :size="18" />
+            <ChevronLeft v-else :size="18" />
           </button>
         </div>
 
@@ -28,7 +36,14 @@
         </div>
 
         <nav class="sidebar-nav" aria-label="Menú principal de estudiante">
-          <RouterLink to="/" class="nav-item" active-class="nav-item-active" exact-active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/"
+            class="nav-item"
+            active-class="nav-item-active"
+            exact-active-class="nav-item-active"
+            :title="isSidebarMini ? 'Inicio' : undefined"
+            @click="onNavClick"
+          >
             <Home :size="19" class="nav-icon" />
             <span>Inicio</span>
           </RouterLink>
@@ -37,8 +52,10 @@
             <button
               type="button"
               class="nav-item nav-group-trigger"
-              :aria-expanded="matriculaExpanded"
-              @click="matriculaExpanded = !matriculaExpanded"
+              :class="{ 'nav-item-active': isSidebarMini && route.path.startsWith('/matricula') }"
+              :aria-expanded="matriculaExpanded && !isSidebarMini"
+              :title="isSidebarMini ? 'Matrícula' : undefined"
+              @click="toggleGroup('matricula')"
             >
               <ClipboardList :size="19" class="nav-icon" />
               <span class="flex-1">Matrícula</span>
@@ -69,37 +86,79 @@
             </div>
           </div>
 
-          <RouterLink to="/plan-estudios" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/plan-estudios"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Plan de Estudios' : undefined"
+            @click="onNavClick"
+          >
             <Layers :size="19" class="nav-icon" />
             <span>Plan de Estudios</span>
           </RouterLink>
 
-          <RouterLink to="/notas-boletin" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/notas-boletin"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Notas y boletín' : undefined"
+            @click="onNavClick"
+          >
             <Award :size="19" class="nav-icon" />
             <span>Notas y boletín</span>
           </RouterLink>
 
-          <RouterLink to="/cursos-grado" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/cursos-grado"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Cursos Req. Grado' : undefined"
+            @click="onNavClick"
+          >
             <GraduationCap :size="19" class="nav-icon" />
             <span>Cursos Req. Grado</span>
           </RouterLink>
 
-          <RouterLink to="/bienestar" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/bienestar"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Actividades Bienestar U.' : undefined"
+            @click="onNavClick"
+          >
             <Heart :size="19" class="nav-icon" />
             <span>Actividades Bienestar U.</span>
           </RouterLink>
 
-          <RouterLink to="/propuesta-grado" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/propuesta-grado"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Inscribir Propuesta Grado' : undefined"
+            @click="onNavClick"
+          >
             <FileEdit :size="19" class="nav-icon" />
             <span>Inscribir Propuesta Grado</span>
           </RouterLink>
 
-          <RouterLink to="/horas-sociales" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/horas-sociales"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Horas sociales (Ciecyt)' : undefined"
+            @click="onNavClick"
+          >
             <Clock :size="19" class="nav-icon" />
             <span>Horas sociales (Ciecyt)</span>
           </RouterLink>
 
-          <RouterLink to="/evaluacion-docente" class="nav-item" active-class="nav-item-active" @click="onNavClick">
+          <RouterLink
+            to="/evaluacion-docente"
+            class="nav-item"
+            active-class="nav-item-active"
+            :title="isSidebarMini ? 'Evaluación Docente' : undefined"
+            @click="onNavClick"
+          >
             <Star :size="19" class="nav-icon" />
             <span>Evaluación Docente</span>
           </RouterLink>
@@ -108,8 +167,10 @@
             <button
               type="button"
               class="nav-item nav-group-trigger"
-              :aria-expanded="serviciosExpanded"
-              @click="serviciosExpanded = !serviciosExpanded"
+              :class="{ 'nav-item-active': isSidebarMini && route.path.startsWith('/servicios') }"
+              :aria-expanded="serviciosExpanded && !isSidebarMini"
+              :title="isSidebarMini ? 'Servicios en Línea' : undefined"
+              @click="toggleGroup('servicios')"
             >
               <Wifi :size="19" class="nav-icon" />
               <span class="flex-1">Servicios en Línea</span>
@@ -149,7 +210,13 @@
     </aside>
 
     <!-- Contenedor principal -->
-    <div class="main-wrapper" :class="{ 'with-sidebar': drawerOpen && !isMobile }">
+    <div
+      class="main-wrapper"
+      :class="{
+        'with-sidebar': drawerOpen && !isMobile,
+        'with-sidebar-mini': isSidebarMini
+      }"
+    >
       <!-- Cabecera superior -->
       <header class="app-header">
         <div class="app-toolbar">
@@ -356,6 +423,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Clock,
   CreditCard,
@@ -392,6 +460,21 @@ const systemModal = ref(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
 const currentTitle = computed(() => route.meta?.title || 'SIGEDIN Académico')
+const isSidebarMini = computed(() => !drawerOpen.value && !isMobile.value)
+
+function toggleGroup(group) {
+  if (isSidebarMini.value) {
+    drawerOpen.value = true
+    if (group === 'matricula') matriculaExpanded.value = true
+    if (group === 'servicios') serviciosExpanded.value = true
+    return
+  }
+  if (group === 'matricula') {
+    matriculaExpanded.value = !matriculaExpanded.value
+  } else if (group === 'servicios') {
+    serviciosExpanded.value = !serviciosExpanded.value
+  }
+}
 
 function handleResize() {
   const mobile = window.innerWidth < 1024
@@ -468,7 +551,8 @@ onUnmounted(() => {
   background-color: var(--color-sidebar-bg);
   color: #ffffff;
   z-index: 40;
-  transition: transform 0.22s ease;
+  overflow: hidden;
+  transition: transform 0.22s ease, width 0.22s ease;
   display: flex;
   flex-direction: column;
 }
@@ -477,23 +561,60 @@ onUnmounted(() => {
   transform: translateX(-100%);
 }
 
+.sidebar-mini {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-mini .sidebar-brand img {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-mini .collapse-btn {
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
+}
+
+.sidebar-mini .nav-item > span,
+.sidebar-mini .group-arrow,
+.sidebar-mini .sidebar-pronto-badge,
+.sidebar-mini .sidebar-footer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-mini .nav-group-children {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .sidebar-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-brand {
   position: relative;
-  padding: 16px;
-  text-align: center;
+  height: 78px;
+  flex-shrink: 0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .sidebar-brand img {
-  width: 100%;
-  max-width: 190px;
+  width: 185px;
+  max-width: 185px;
   height: auto;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
 }
 
 .collapse-btn {
@@ -509,6 +630,7 @@ onUnmounted(() => {
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: top 0.22s ease, right 0.22s ease, transform 0.22s ease, background-color 0.15s ease;
 }
 
 .collapse-btn:hover {
@@ -543,7 +665,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  padding: 8px 20px;
+  padding: 8px 22px;
   font-size: 0.95rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.92);
@@ -551,8 +673,15 @@ onUnmounted(() => {
   border: none;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.15s ease;
+}
+
+.nav-item > span,
+.group-arrow,
+.sidebar-pronto-badge {
+  transition: opacity 0.15s ease;
 }
 
 .nav-item:hover {
@@ -588,6 +717,9 @@ onUnmounted(() => {
 
 .nav-group-children {
   background: rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  max-height: 200px;
+  transition: max-height 0.22s ease, opacity 0.18s ease;
 }
 
 .nav-child {
@@ -613,6 +745,9 @@ onUnmounted(() => {
   font-size: 0.75rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.15s ease;
 }
 
 .role-tag {
@@ -642,6 +777,10 @@ onUnmounted(() => {
 
 .main-wrapper.with-sidebar {
   padding-left: var(--sidebar-width);
+}
+
+.main-wrapper.with-sidebar-mini {
+  padding-left: var(--sidebar-collapsed-width);
 }
 
 .app-header {
@@ -929,7 +1068,26 @@ onUnmounted(() => {
   }
 }
 
+@media (max-width: 767px) {
+  .toolbar-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 599px) {
+  .app-toolbar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .toolbar-title {
+    font-size: 0.96rem;
+  }
+
   .account-info {
     display: none;
   }

@@ -23,6 +23,7 @@
 
   /* Layout */
   --sidebar-width: 285px;
+  --sidebar-collapsed-width: 64px;
   --header-min-height: 54px;
   --radius-sm: 8px;
   --radius-md: 12px;
